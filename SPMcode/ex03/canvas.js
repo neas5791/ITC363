@@ -19,27 +19,29 @@ window.onload = function init()
     
 
     canvas.addEventListener("mousedown", function(event){
-	if (count == 0 ) {
-          gl.clearColor(0.0, 0.0, 0.0, 1.0);
-          gl.clear( gl.COLOR_BUFFER_BIT );
+        if (count == 0 ) {
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.clear( gl.COLOR_BUFFER_BIT );
         }
         // Get the point fromt the event
-	x = -1 + ( 2 * ( event.clientX ) / canvas.width );
-	y = -1 + ( 2 * ( ( canvas.height - event.clientY ) ) / canvas.height);
-	//console.log ("[" + x + ", " + y + "]");
+        // x = -1 + ( 2 * ( event.clientX ) / canvas.width );
+        // y = -1 + ( 2 * ( ( canvas.height - event.clientY ) ) / canvas.height);
+        x = -1 + ( 2 * ( event.offsetX ) / canvas.width );
+        y = -1 + ( 2 * ( ( canvas.height - event.offsetY ) ) / canvas.height);
+        //console.log ("[" + x + ", " + y + "]");
 	
-	point = vec2(x,y);
-	console.log(point);
-	points[count++]= point;
+        point = vec2(x,y);
+        console.log(point);
+        points[count++]= point;
 
 
-	// After all vertices entered send data to buffer and render
-	if (count == NumVertices) {
-		//console.log(points[0]);
-		gl.bufferData(gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW);
+        // After all vertices entered send data to buffer and render
+        if (count == NumVertices) {
+            //console.log(points[0]);
+            gl.bufferData(gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW);
 
-		render();
-	}
+            render();
+        }
     });
 
 
@@ -71,7 +73,7 @@ window.onload = function init()
         NumVertices = event.target.value;
     };
 
-    render();
+    //render();
 //    points = [];
 };
 
