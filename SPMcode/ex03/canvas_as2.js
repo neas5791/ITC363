@@ -47,6 +47,7 @@ window.onload = function init()
     // Slider handler fix: event added to parameter list (KWL 22/05/2015)
     document.getElementById("slider").onchange = function(event) {
         NumVertices = event.target.value;
+
         console.log("NumVertices=" + NumVertices);
     };
 
@@ -63,10 +64,11 @@ window.onload = function init()
         //console.log ("[" + x + ", " + y + "]");
     
         point = vec2(x,y);
-        console.log(point + " : " + count);
+        // console.log(point + " : " + count);
+
         points[count++]= point;
 
-
+        showState();
         // After all vertices entered send data to buffer and render
         // if (count == NumVertices) {
         //     //console.log(points[0]);
@@ -79,7 +81,7 @@ window.onload = function init()
     });
 };
 
-
+// http://www.corehtml5.com/trianglestripfundamentals.php
 function render() {
     gl.clear( gl.COLOR_BUFFER_BIT );
     gl.drawArrays( gl.POINTS, 0, count  );
@@ -89,4 +91,9 @@ function render() {
         gl.drawArrays( gl.TRIANGLE_STRIP, 0, count );
         count = 0;
     }
+
+}
+
+function showState() {
+    console.log("currently " + count + " of " + NumVertices + " selected. Array Length is " + points.length);
 }
