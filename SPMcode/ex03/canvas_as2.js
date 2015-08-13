@@ -1,8 +1,8 @@
 
 var gl;
 var points = [];
-var x;
-var y;
+var x, xx;
+var y, yy;
 var count = 0;
 var NumVertices = 4; // Minimum vertices for polygon
 
@@ -55,13 +55,21 @@ window.onload = function init()
 //    points = [];
 
     canvas.addEventListener("mousedown", function(event){
+        var rect = canvas.getBoundingClientRect();
+        xx = 2*(event.clientX-rect.left)/canvas.width-1;
+        yy = 2*(canvas.height-(event.clientY-rect.top))/canvas.height-1;
+
+
+
         if (count == 0 ) {
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
             gl.clear( gl.COLOR_BUFFER_BIT );
         }
         x = -1 + ( 2 * ( event.offsetX ) / canvas.width );
         y = -1 + ( 2 * ( ( canvas.height - event.offsetY ) ) / canvas.height);
-        //console.log ("[" + x + ", " + y + "]");
+        
+        showLocation(x, y);
+        showLocation(xx,yy);
     
         point = vec2(x,y);
         // console.log(point + " : " + count);
@@ -86,14 +94,18 @@ function render() {
     gl.clear( gl.COLOR_BUFFER_BIT );
     gl.drawArrays( gl.POINTS, 0, count  );
 
-    if(count == NumVertices ) {
+    if(count >= NumVertices ) {
         gl.drawArrays( gl.LINE_STRIP, 0, count );
         gl.drawArrays( gl.TRIANGLE_STRIP, 0, count );
-        count = 0;
+        //count = 0;
     }
 
+}
+function showLocation(u, v){
+    console.log("[" + u + ":" + v + "]");
 }
 
 function showState() {
     console.log("currently " + count + " of " + NumVertices + " selected. Array Length is " + points.length);
+
 }
