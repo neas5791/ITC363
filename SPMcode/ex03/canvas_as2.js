@@ -115,12 +115,8 @@ function showLocation(u, v) {
 
 function showState() {
     console.log("currently " + count + " of " + NumVertices + " selected. Array Length is " + points.length);
-<<<<<<< HEAD
 }
 
 function clearState() {
     points = [];
-=======
-
->>>>>>> 5c2c7f21bc2d980daa93611ec421fa46bb81d6df
 }
