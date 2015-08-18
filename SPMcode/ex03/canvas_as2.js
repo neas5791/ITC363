@@ -70,7 +70,9 @@ window.onload = function init()
 
         x = -1 + ( 2 * ( event.offsetX ) / canvas.width );
         y = -1 + ( 2 * ( ( canvas.height - event.offsetY ) ) / canvas.height);
+
         showLocation(x, y);
+
 
         point = vec2(x,y);
         // console.log(point + " : " + count);
@@ -96,12 +98,15 @@ function render() {
     gl.clear( gl.COLOR_BUFFER_BIT );
     gl.drawArrays( gl.POINTS, 0, count  );
 
-    if(count == NumVertices ) {
+    if(count >= NumVertices ) {
         gl.drawArrays( gl.LINE_STRIP, 0, count );
         gl.drawArrays( gl.TRIANGLE_STRIP, 0, count );
-        count = 0;
+        //count = 0;
     }
 
+}
+function showLocation(u, v){
+    console.log("[" + u + ":" + v + "]");
 }
 
 function showLocation(u, v) {
@@ -110,8 +115,12 @@ function showLocation(u, v) {
 
 function showState() {
     console.log("currently " + count + " of " + NumVertices + " selected. Array Length is " + points.length);
+<<<<<<< HEAD
 }
 
 function clearState() {
     points = [];
+=======
+
+>>>>>>> 5c2c7f21bc2d980daa93611ec421fa46bb81d6df
 }

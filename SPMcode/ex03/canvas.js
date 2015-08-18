@@ -5,7 +5,7 @@ var x;
 var y;
 var count = 0;
 var NumVertices = 2;
-
+// var countPoints = 4;
 window.onload = function init()
 {
     var canvas = document.getElementById( "gl-canvas" );
@@ -16,8 +16,15 @@ window.onload = function init()
     //
     //  Initialize our point
     //
-    
 
+    // points[0] = vec2(0,0);
+    // points[1] = vec2(canvas.width,0);
+    // points[2] = vec2(0,canvas.height);
+    // points[3] = vec2(canvas.width,canvas.height);
+    // var countPoints = count;
+
+
+    // console.log("countPoints :" + countPoints);
     canvas.addEventListener("mousedown", function(event){
         if (count == 0 ) {
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -42,6 +49,7 @@ window.onload = function init()
 
             render();
         }
+
     });
 
 
@@ -80,6 +88,10 @@ window.onload = function init()
 
 function render() {
     gl.clear( gl.COLOR_BUFFER_BIT );
-    gl.drawArrays( gl.LINE_STRIP, 0, NumVertices );
+
+    // console.log("countPoints : " + countPoints);
+    // console.log("NumVertices : " + NumVertices);
+    // console.log("Array.length : " + points.length);
+    gl.drawArrays( gl.LINE_STRIP, 0, NumVertices);
     count = 0;
 }
