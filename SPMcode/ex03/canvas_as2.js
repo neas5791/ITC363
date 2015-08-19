@@ -48,12 +48,10 @@ window.onload = function init()
     // Mousedown handler
     canvas.addEventListener("mousedown", function(event){
 
-        var rect = canvas.getBoundingClientRect();
+        addPoint( canvas, event );
 
-        xx = 2*(event.clientX-rect.left)/canvas.width-1;
-        yy = 2*(canvas.height-(event.clientY-rect.top))/canvas.height-1;
 
-        showLocation(xx, yy);
+
 
         if (count == 0 ) {
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -67,14 +65,17 @@ window.onload = function init()
 
 
         point = vec2(xx,yy);
-        // console.log(point + " : " + count);
-
-        if (point.length + 1 % 3 == 0) {
-            var test = point.slice(point.length - 3, point.length - 1);
-            console.log("hi " + RHTwinding( test ));
-        }
-
         points[count++]= point;
+
+
+        // console.log(point + " : " + count);
+        // console.log("About to if :::" + ( points.length + 1 ) % 3 + points.length);
+        // if ( ( points.length + 1 ) % 3 == 0 && points.length != 0) {
+        //     var test = point.slice(points.length - 3, points.length - 1);
+        //     console.log("hi " + RHTwinding( test ));
+        // }
+
+
 
         // a little bit more console action to see the state of things
         showState();
@@ -126,7 +127,14 @@ function RHTwinding(vlist) {
     return norm[2] >= 0;
 }
 
+function addPoint(canvas, event) {
+        var rect = canvas.getBoundingClientRect();
 
+        xx = 2*(event.clientX-rect.left)/canvas.width-1;
+        yy = 2*(canvas.height-(event.clientY-rect.top))/canvas.height-1;
+
+        showLocation(xx, yy);
+}
 
 function createGL( canvas ) {
         //
