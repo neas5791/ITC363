@@ -13,6 +13,10 @@ var colLoc;
 
 
 window.onload = function() {
+    document.getElementById("count").innerHTML = NumVertices;
+
+
+
 	var canvas = document.getElementById("gl-canvas");
 
 	//  Initialize GL context
@@ -56,6 +60,20 @@ window.onload = function() {
 		}
     });
 
+
+        // Handle the slider event 
+    document.getElementById("slider").onchange = function(event) {
+        // set variable to slider value
+        NumVertices = event.target.value;
+        // just a little bit of sconsole action to see how things are going
+        var element = document.getElementById("count");
+        element.innerHTML = NumVertices;
+
+        clearCanvas(); // clear the screen and reset for the user to start again
+
+        console.log("NumVertices is now " + NumVertices);
+    };
+
     render();
 
 }
@@ -74,9 +92,16 @@ function render() {
     // Rendering colour depends on whether winding is anticlockwise
     if (count == NumVertices) {
 		colour = RHTwinding(vertices) ? GREEN : RED;
+        console.log(RHTwinding(vertices));
         gl.uniform4fv(colLoc, flatten(colour));
-        gl.drawArrays(gl.TRIANGLES, 0, vertices.length);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertices.length);
         count = 0;	// Allow user to repeat after each rendering
 	}
 }
 
+function clearCanvas() {
+    vertices = [];
+    count = 0;
+
+    render();
+}
