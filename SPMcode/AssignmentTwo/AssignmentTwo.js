@@ -7,6 +7,7 @@ var count = 0;
 var NumVertices = 3;
 
 var winding = 1;
+
 var GREEN = vec4(0.0, 1.0, 0.0, 1.0);
 var RED = vec4(1.0, 0.0, 0.0, 1.0);
 var colLoc;
@@ -79,9 +80,13 @@ window.onload = function() {
 }
 // Tests if the winding is anticlockwise (Right Hand Thumb rule)
 function RHTwinding(vlist) {
+    var i = vlist.length;
+
 	// Argument is assumed an array of 3 3D points in order P0, P1, P2
 	// Calculate cross product (P1-P0)x(P2-P0)
-	var norm = cross(subtract(vlist[1], vlist[0]), subtract(vlist[2], vlist[0]));
+    // console.log(i);
+    console.log ("["+ (i - 2) +":"+(i-3)+"]");
+	var norm = cross(subtract(vlist[i-2], vlist[i-3]), subtract(vlist[i-1], vlist[i-3]));
 	return norm[2] >= 0;
 }
 
@@ -92,11 +97,14 @@ function render() {
     // Rendering colour depends on whether winding is anticlockwise
     if (count == NumVertices) {
 		colour = RHTwinding(vertices) ? GREEN : RED;
-        console.log(RHTwinding(vertices));
+        // console.log(RHTwinding(vertices));
         gl.uniform4fv(colLoc, flatten(colour));
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertices.length);
         count = 0;	// Allow user to repeat after each rendering
 	}
+    colour = vec4(0.0, 0.0, 0.0, 1.0);
+    gl.uniform4fv(colLoc, flatten(colour));
+    gl.drawArrays(gl.LINE_STRIP, 0, vertices.length)
 }
 
 function clearCanvas() {
@@ -104,4 +112,6 @@ function clearCanvas() {
     count = 0;
 
     render();
+
+    console.log(sizeof['vec3']);
 }
