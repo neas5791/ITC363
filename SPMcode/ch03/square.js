@@ -4,7 +4,7 @@ var canvas;
 var gl;
 
 
-var maxNumTriangles = 200;
+var maxNumTriangles = 2;
 var maxNumVertices  = 3 * maxNumTriangles;
 var index = 0;
 

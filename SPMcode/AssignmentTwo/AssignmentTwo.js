@@ -1,11 +1,12 @@
 
 
 var gl;
-var vertices = [];
+var vertices = []; // array of vec3 vertices
 
 var count = 0;
 var NumVertices = 3;
 
+var maxVertices = 3;
 var winding = 1;
 
 var GREEN = vec4(0.0, 1.0, 0.0, 1.0);
@@ -14,10 +15,11 @@ var colLoc;
 
 
 window.onload = function() {
+    
+    // sets the number of vertices html element
     document.getElementById("count").innerHTML = NumVertices;
 
-
-
+    // create the canvas object
 	var canvas = document.getElementById("gl-canvas");
 
 	//  Initialize GL context
@@ -35,10 +37,10 @@ window.onload = function() {
 	gl.clearColor(0.7, 0.7, 0.7, 1.0);
 
 	//  Setup a GPU buffer for data
-    var bufferId = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
-
-
+    var vBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+    gl.bufferData( gl.ARRAY_BUFFER, sizeof['vec3'] * 4 * maxVertices, gl.STATIC_DRAW );
+    console.log(sizeof['vec3']);
     // Associate our shader variables with our data buffer
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
@@ -49,16 +51,23 @@ window.onload = function() {
 
 
     canvas.addEventListener("mousedown", function(event){
-		// Allow for canvas bounding box and record vertex
-		var rect = canvas.getBoundingClientRect();
-        vertices[count++] = vec3(2*(event.clientX-rect.left)/canvas.width-1,
-           2*(canvas.height-(event.clientY-rect.top))/canvas.height-1, 0);
+        // if ( count == 0 )
+        //      showLocation(vertices[0]);
 
-        // After all vertices entered send data to buffer and render
-        if (count == NumVertices) {
-			gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
-			render();
-		}
+        // Allow for canvas bounding box and record vertex
+		var rect = canvas.getBoundingClientRect();
+        
+        vertices[count] = vec3( 2 * (event.clientX-rect.left) / canvas.width - 1,
+                                  2 * (canvas.height- (event.clientY-rect.top) ) / canvas.height - 1,
+                                  0
+                                  );
+
+        showLocation(vertices[count]);
+            
+        gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3'] * (count), flatten(vertices));
+
+        count++;
+        render();
     });
 
 
@@ -90,7 +99,7 @@ function RHTwinding(vlist) {
 	return norm[2] >= 0;
 }
 
-function render() {
+function render1() {
 	var colour;
     gl.clear(gl.COLOR_BUFFER_BIT);
     // Render triangle only if defined
@@ -99,7 +108,7 @@ function render() {
 		colour = RHTwinding(vertices) ? GREEN : RED;
         // console.log(RHTwinding(vertices));
         gl.uniform4fv(colLoc, flatten(colour));
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertices.length);
+        gl.drawArrays(gl.LINE, 0, vertices.length);
         count = 0;	// Allow user to repeat after each rendering
 	}
     colour = vec4(0.0, 0.0, 0.0, 1.0);
@@ -113,5 +122,40 @@ function clearCanvas() {
 
     render();
 
-    console.log(sizeof['vec3']);
+    console.log("clearCanvas called");
+    // console.log(sizeof['vec3']);
+}
+
+function render(){
+    // cleans the screen paints canvas 
+    gl.clear( gl.COLOR_BUFFER_BIT );
+
+    // set colour to black
+    colour = vec4(0.0,0.0,0.0,1.0);
+
+    if (count == 2)
+        colour = RED;
+    else if ( count == 3)
+        colour = GREEN;
+
+    gl.uniform4fv(colLoc, flatten(colour));
+    gl.drawArrays( gl.POINTS, 0, count );
+
+
+    // if (count == 2) {
+    //     colour = GREEN;
+    //     gl.uniform4fv(colLoc, flatten(colour));
+    //     // gl.drawArrays(gl.LINE, 0, count);
+    // } 
+    // else if (count > 2) {
+    //     console.log("more then two vertices")
+    // }
+
+}
+
+// function showLocation(u, v) {
+//     console.log("[" + u + ":" + v + "]" );
+// }
+function showLocation(u) {
+    console.log("[" + u[0] + ":" + u[1] + ":" + u[2] + "]" );
 }
