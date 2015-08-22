@@ -4,7 +4,8 @@ var gl;
 var vertices = []; // array of vec3 vertices
 
 var index = 0;
-var max = 3;
+var vCount = 3;
+var maxVertices = 10;
 
 var GREEN = vec4(0.0, 1.0, 0.0, 1.0);
 var RED = vec4(1.0, 0.0, 0.0, 1.0);
@@ -14,7 +15,7 @@ var colLoc;
 window.onload = function() {
     
     // sets the number of vertices html element
-    document.getElementById("count").innerHTML = max;
+    document.getElementById("count").innerHTML = vCount;
 
     // create the canvas object
 	var canvas = document.getElementById("gl-canvas");
@@ -36,12 +37,16 @@ window.onload = function() {
 	//  Setup a GPU buffer for data
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    gl.bufferData( gl.ARRAY_BUFFER, 8 * 3 * 10, gl.STATIC_DRAW );
+    gl.bufferData( gl.ARRAY_BUFFER, 8 * maxVertices, gl.STATIC_DRAW );
 
     // Associate our shader variables with our data buffer
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
+
+    var cBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, 16 * maxVertices, gl.STATIC_DRAW );
 
     // Associate our shader variable with the data buffer
     var vColor = gl.getAttribLocation( program, "vColor" );
@@ -55,29 +60,22 @@ window.onload = function() {
     /* ********************************************************************** */
     canvas.addEventListener("mousedown", function(event){
         gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
-        // state();
-
         // Allow for canvas bounding box and record vertex
 		var rect = canvas.getBoundingClientRect();
-        
-        
-
         var t = 
             vec3( 2 * (event.clientX-rect.left) / canvas.width - 1, 
                     2 * (canvas.height- (event.clientY-rect.top) ) / canvas.height - 1, 0);
-
-
-        //showLocation(vertices[index]);
-        console.log(index);
         gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3'] * index, flatten(t));
 
-         if (index % 2 == 0)
+
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+        if (index % 2 == 0)
             colour = RED;
         else 
             colour = GREEN;
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
-        t = index % 2 == 0 ? GREEN:RED; //vec4(colors[(index)%7]);
+        t = index % 2 == 0 ? GREEN : RED; //vec4(colors[(index)%7]);
         gl.bufferSubData(gl.ARRAY_BUFFER, 16*index, flatten(t));
 
         index++;
@@ -89,14 +87,14 @@ window.onload = function() {
     // Handle the slider event 
     document.getElementById("slider").onchange = function(event) {
         // set variable to slider value
-        max = event.target.value;
+        vCount = event.target.value;
         // just a little bit of sconsole action to see how things are going
         var element = document.getElementById("count");
-        element.innerHTML = max;
+        element.innerHTML = vCount;
 
         clearCanvas(); // clear the screen and reset for the user to start again
 
-        console.log("NumVertices is now " + max);
+        console.log("NumVertices is now " + vCount);
     };
 
     render();
@@ -106,28 +104,41 @@ window.onload = function() {
 function render(){
     // cleans the screen paints canvas 
     gl.clear( gl.COLOR_BUFFER_BIT );
-
+    // gl.uniform4fv(colLoc, flatten(RED));
+    gl.drawArrays(gl.LINE_LOOP, 0, index);
+/*
     // set colour to black
     // colour = vec4(0.0,0.0,0.0,1.0);
-
-
     
-    if (index < max){
+    if (index < vCount){
 //        gl.uniform4fv(colLoc, flatten(colour));
-        gl.drawArrays( gl.POINTS, 0, index );
-    }
-    else if (index == max) {
-        gl.drawArrays(gl.TRINGLE_STRIP,0,index);
+        gl.drawArrays( gl.LINE_STRIP, 0, index );
     }    
-    else if (index > max) {
+    else if (index > vCount) {
         clearCanvas();
         showArray(vertices);
     }
+
+
+    if (index == vCount) {
+        console.log("paint triangle");
+        gl.drawArrays(gl.TRINGLE_STRIP,0,index);
+    }*/
+    if (isComplete()){
+        reset();
+    }
 }
 
-// function showLocation(u, v) {
-//     console.log("[" + u + ":" + v + "]" );
-// }
+function isComplete(){
+    return index == vCount ? true : false;
+}
+
+function reset(){
+    vertices = [];
+    index = 0;
+
+}
+
 function showLocation(u) {
     console.log("[" + u[0] + ":" + u[1] + ":" + u[2] + "]" );
 }
@@ -144,11 +155,8 @@ function RHTwinding(vlist) {
     return norm[2] >= 0;
 }
 
-
-
 function clearCanvas() {
-    vertices = [];
-    index = 0;
+    reset();
 
     render();
 
@@ -177,7 +185,7 @@ function render1() {
 function state(){
     console.log("vertices length is " + vertices.length);
     console.log("index is " + index);
-    console.log("max is set to " + max);
+    console.log("vCount is set to " + vCount);
 }
 
 function showArray(arr){
