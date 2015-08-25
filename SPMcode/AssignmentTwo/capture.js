@@ -67,6 +67,7 @@ window.onload = function() {
                     2 * (canvas.height- (event.clientY-rect.top) ) / canvas.height - 1, 0);
         gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3'] * index, flatten(t));
 
+        vertices.push(t);
 
 
         gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
@@ -77,10 +78,9 @@ window.onload = function() {
 
         t = index % 2 == 0 ? GREEN : RED; //vec4(colors[(index)%7]);
         gl.bufferSubData(gl.ARRAY_BUFFER, 16*index, flatten(t));
-
-        vertices.push(t);
+        
         index++;
-        state();
+        //state();
 
         if (index > 2){
             clockwise = RHTwinding(vertices);
@@ -156,8 +156,20 @@ function RHTwinding(vlist) {
     // Argument is assumed an array of 3 3D points in order P0, P1, P2
     // Calculate cross product (P1-P0)x(P2-P0)
     // console.log(i);
-    console.log ("["+ (i - 2) +":"+(i-3)+"]");
-    var norm = cross(subtract(vlist[i-2], vlist[i-3]), subtract(vlist[i-1], vlist[i-3]));
+    // var norm = cross(subtract(vlist[1], vlist[0]), subtract(vlist[2], vlist[0]));
+    // return norm[2] >= 0;
+
+
+    // console.log ("[" + ( i - 2 ) + ":" + ( i - 3 ) + "]");
+
+    // console.log("vlist[0]" + vlist[ i - 3 ]);
+    // console.log("vlist[1]" + vlist[ i - 2 ]);
+    // console.log("vlist[2]" + vlist[ i - 1 ]);
+
+    // console.log(subtract(vlist[ i - 2 ], vlist[ i - 3 ]));
+    // console.log(subtract(vlist[ i - 1 ], vlist[ i - 3 ]));
+
+    var norm = cross(subtract(vlist[ i - 2 ], vlist[ i - 3 ]), subtract(vlist[ i - 1 ], vlist[ i - 3 ]));
     return norm[2] >= 0;
 }
 
