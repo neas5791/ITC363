@@ -37,7 +37,7 @@ window.onload = function() {
 	//  Setup a GPU buffer for data
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    gl.bufferData( gl.ARRAY_BUFFER, 8 * maxVertices, gl.STATIC_DRAW );
+    gl.bufferData( gl.ARRAY_BUFFER, sizeof['vec3'] * maxVertices, gl.STATIC_DRAW );
 
     // Associate our shader variables with our data buffer
     var vPosition = gl.getAttribLocation(program, "vPosition");
@@ -46,7 +46,7 @@ window.onload = function() {
 
     var cBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, 16 * maxVertices, gl.STATIC_DRAW );
+    gl.bufferData( gl.ARRAY_BUFFER, sizeof['vec4'] * maxVertices, gl.STATIC_DRAW );
 
     // Associate our shader variable with the data buffer
     var vColor = gl.getAttribLocation( program, "vColor" );
@@ -66,10 +66,10 @@ window.onload = function() {
             vec3( 2 * (event.clientX-rect.left) / canvas.width - 1, 
                     2 * (canvas.height- (event.clientY-rect.top) ) / canvas.height - 1, 0);
         gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3'] * index, flatten(t));
-
+        // add the vertex to the array for testing
         vertices.push(t);
 
-
+        // change buffer for colour selection
         gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
         if (index % 2 == 0)
             colour = RED;
@@ -101,6 +101,7 @@ window.onload = function() {
         clearCanvas(); // clear the screen and reset for the user to start again
 
         console.log("NumVertices is now " + vCount);
+
     };
 
     render();
@@ -185,7 +186,7 @@ function clearCanvas() {
 function render1() {
     var colour;
     gl.clear(gl.COLOR_BUFFER_BIT);
-    
+    testMessage(6);
     // Render triangle only if defined
     // Rendering colour depends on whether winding is anticlockwise
     if (index == NumVertices) {
@@ -209,5 +210,10 @@ function state(){
 function showArray(arr){
     for (  i = 0; i < arr.length; i++ ) {
         console.log("vertics["+ i +"] = "+ arr[i]);
+    }
+}
+function testMessage(index){
+    if (index >= index){
+        state();
     }
 }
