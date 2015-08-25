@@ -13,6 +13,7 @@ var GREEN = vec4(0.0, 1.0, 0.0, 1.0);
 var RED = vec4(1.0, 0.0, 0.0, 1.0);
 var colLoc;
 
+var clockwise = false;
 
 window.onload = function() {
     
@@ -94,8 +95,8 @@ function RHTwinding(vlist) {
 	// Argument is assumed an array of 3 3D points in order P0, P1, P2
 	// Calculate cross product (P1-P0)x(P2-P0)
     // console.log(i);
-    console.log ("["+ (i - 2) +":"+(i-3)+"]");
-	var norm = cross(subtract(vlist[i-2], vlist[i-3]), subtract(vlist[i-1], vlist[i-3]));
+    console.log ("[" + (i - 2) + ":" + ( i - 3 ) + "]");
+	var norm = cross(subtract(vlist[ i - 2 ], vlist[ i - 3 ]), subtract(vlist[ i - 1 ], vlist[ i - 3 ]));
 	return norm[2] >= 0;
 }
 
@@ -153,9 +154,27 @@ function render(){
 
 }
 
-// function showLocation(u, v) {
-//     console.log("[" + u + ":" + v + "]" );
-// }
+// Tests if the line segments are intersecting
+// @param vlist is an array of vec3 vertices
+
+function intersecting(vlist) {
+    // Argument is assumed an array of 4 2D points in order P0, P1, Q0, Q1
+    // create vector from the last vertex
+    var pq = subtract(vlist[vlist.length - 1], vlist[vlist.length - 2]);  // The vector from the Pn to Pn-1 (i.e. Q0-P0)
+    var v = subtract(vlist[1], vlist[0]);   // The vector from P0 to P1
+    var w = subtract(vlist[3], vlist[2]);   // The vector from Q0 to Q1
+    var v2 = dot(v, v);
+    var w2 = dot(w, w);
+    var vw = dot(v, w);
+    var denom = v2*w2 - vw*vw;
+    var alpha = dot(pq, subtract(scale(w2,v), scale(vw,w)))/denom;
+    var beta = -dot(pq, subtract(scale(v2,w), scale(vw,v)))/denom;
+    // The intersection condition counts touching segments as not intersecting
+    return alpha > 0.0 && alpha < 1.0 && beta > 0.0 && beta < 1.0;
+}
+
+
+
 function showLocation(u) {
     console.log("[" + u[0] + ":" + u[1] + ":" + u[2] + "]" );
 }

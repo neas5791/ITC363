@@ -1,0 +1,23 @@
+http://www.mathisfunforum.com/viewtopic.php?id=11825
+
+http://math.stackexchange.com/questions/44770/intersection-of-two-vectors-using-perpedicular-dot-product
+
+http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
+
+https://www.youtube.com/watch?v=nKVCvY-FW5Q
+
+http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+
+https://www.google.com.au/search?q=how+to+check+if+two+vectors+intersect&rlz=1C1GIWA_enAU597AU597&oq=how+to+check+if+two+vectors+intersect&aqs=chrome..69i57.10091j0j1&sourceid=chrome&es_sm=122&ie=UTF-8#q=how+to+check+if+two+vectors+intersect+using+dot+product
+
+https://www.khanacademy.org/math/linear-algebra/vectors_and_spaces/dot_cross_products/v/vector-dot-product-and-vector-length
+
+**** great explanation of triangle_strip
+http://www.corehtml5.com/trianglestripfundamentals.php
+****
+
+https://www.google.com.au/search?q=gl.triangle_strip&rlz=1C1GIWA_enAU597AU597&oq=gl.triangle_strip&aqs=chrome..69i57.7176j0j1&sourceid=chrome&es_sm=122&ie=UTF-8#q=gl.triangle_strip+webgl
+
+http://www.informit.com/articles/article.aspx?p=2111395&seqNum=2
+
+http://artgrammer.blogspot.com.au/2011/05/drawing-nearly-perfect-2d-line-segments.html
