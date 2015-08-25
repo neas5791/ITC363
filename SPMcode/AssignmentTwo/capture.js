@@ -78,8 +78,14 @@ window.onload = function() {
         t = index % 2 == 0 ? GREEN : RED; //vec4(colors[(index)%7]);
         gl.bufferSubData(gl.ARRAY_BUFFER, 16*index, flatten(t));
 
+        vertices.push(t);
         index++;
         state();
+
+        if (index > 2){
+            clockwise = RHTwinding(vertices);
+            console.log("clockwise = " + clockwise);
+        }
         render();
     });
 

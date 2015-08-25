@@ -68,6 +68,11 @@ window.onload = function() {
         gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3'] * (count), flatten(vertices));
 
         count++;
+        if (vertices.length > 2){
+            clockwise = RHTwinding(vertices);
+            console.log("clockwise = " + clockwise);
+        }
+        
         render();
     });
 
