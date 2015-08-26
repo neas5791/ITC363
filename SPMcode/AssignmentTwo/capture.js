@@ -49,13 +49,16 @@ window.onload = function() {
     gl.bufferData( gl.ARRAY_BUFFER, sizeof['vec4'] * maxVertices, gl.STATIC_DRAW );
 
     // Associate our shader variable with the data buffer
-    var vColor = gl.getAttribLocation( program, "vColor" );
-    gl.vertexAttribPointer( vColor, 4, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vColor );
-
+    // // var vColor = gl.getAttribLocation( program, "vColor" );
+    // // gl.vertexAttribPointer( vColor, 4, gl.FLOAT, false, 0, 0 );
+    // // gl.enableVertexAttribArray( vColor );
 
     // Get location of uniform variable
-    colLoc = gl.getUniformLocation(program, "colour");
+    // the variable for colour used in the application has to 
+    // be linked to the corresponding variable in the vertex shader.
+    // The function gl.getUniformLocation performs the first step in the 
+    // process by obtaining an identifier for the vertex shader variable vColor.
+    colLoc = gl.getUniformLocation(program, "uColour");
 
     /* ********************************************************************** */
     canvas.addEventListener("mousedown", function(event){
@@ -70,14 +73,15 @@ window.onload = function() {
         vertices.push(t);
 
         // change buffer for colour selection
-        gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+        
+        // gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
         if (index % 2 == 0)
             colour = RED;
         else 
             colour = GREEN;
 
         t = index % 2 == 0 ? GREEN : RED; //vec4(colors[(index)%7]);
-        gl.bufferSubData(gl.ARRAY_BUFFER, 16*index, flatten(t));
+        // gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec4']*index, flatten(t));
         
         index++;
         //state();
@@ -111,15 +115,23 @@ window.onload = function() {
 function render(){
     // cleans the screen paints canvas 
     gl.clear( gl.COLOR_BUFFER_BIT );
-    // gl.uniform4fv(colLoc, flatten(RED));
-    gl.drawArrays(gl.LINE_LOOP, 0, index);
+    gl.uniform4fv(colLoc, flatten(RED));
+
+    if (index == vCount) {
+        console.log("paint triangle");
+        gl.drawArrays(gl.TRINGLES,0,index);
+    }
+
 /*
+    // gl.uniform4fv(colLoc, flatten(RED));
+    // gl.drawArrays(gl.LINE_LOOP, 0, index);
+
     // set colour to black
     // colour = vec4(0.0,0.0,0.0,1.0);
     
     if (index < vCount){
-//        gl.uniform4fv(colLoc, flatten(colour));
-        gl.drawArrays( gl.LINE_STRIP, 0, index );
+        gl.uniform4fv(colLoc, flatten(RED));
+        gl.drawArrays( gl.TRIANGLE, 0, index );
     }    
     else if (index > vCount) {
         clearCanvas();
@@ -130,10 +142,10 @@ function render(){
     if (index == vCount) {
         console.log("paint triangle");
         gl.drawArrays(gl.TRINGLE_STRIP,0,index);
-    }*/
+    }
     if (isComplete()){
         reset();
-    }
+    }*/
 }
 
 function isComplete(){

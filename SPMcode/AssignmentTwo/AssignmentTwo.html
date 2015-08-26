@@ -6,29 +6,26 @@
 
 <script id="vertex-shader" type="x-shader/x-vertex">
 
-  attribute vec4 vPosition;
-  attribute vec4 vColor;
+  attribute vec4 vPosition;  
 
-  varying vec4 fColor;
-  
   void
   main() {
     gl_PointSize = 5.0;
     gl_Position = vPosition;
-
-    fColor = vColor;
   }
+
 </script>
 
 <script id="fragment-shader" type="x-shader/x-fragment">
 
   precision mediump float;
-  varying vec4 fColor;
-  
+  uniform vec4 uColour;
+
   void main() {
     //the below changes the colour of the displayed vertices
-    gl_FragColor = fColor;
+    gl_FragColor = uColour;
   }
+  
 </script>
 
 <script type="text/javascript" src="../Common/webgl-utils.js"></script>
