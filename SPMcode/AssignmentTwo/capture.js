@@ -1,9 +1,10 @@
 
 
 var gl;
-var vertices = []; // array of vec3 vertices
 
+var vertices = []; // array of vec3 vertices
 var index = 0;
+
 var vCount = 3;
 var maxVertices = 10;
 
@@ -26,17 +27,56 @@ window.onload = function() {
 		alert("WebGL isn't available");
 	}
 
+    canvas.addEventListener("mousedown", function(event){
+        gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
+        // Allow for canvas bounding box and record vertex
+        var rect = canvas.getBoundingClientRect();
+        
+        var t = vec3( 2 * (event.clientX-rect.left) / canvas.width - 1,
+           2 * (canvas.height- (event.clientY-rect.top) ) / canvas.height - 1, 0);
+   
+        gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3'] * index, flatten(t));
+        // add the vertex to the array for testing
+        vertices.push(t);
+
+        // change buffer for colour selection
+        
+        // gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+        // if (index % 2 == 0)
+        //     colour = RED;
+        // else 
+        //     colour = GREEN;
+
+        // t = index % 2 == 0 ? GREEN : RED; //vec4(colors[(index)%7]);
+        // // gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec4']*index, flatten(t));
+        
+        index++;
+        //state();
+
+        if (index > 2){
+            clockwise = RHTwinding(vertices);
+            console.log("clockwise = " + clockwise);
+            render();
+        }
+
+    });
+
+
+    //  setup the viewport and initial colour
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clearColor(0.7, 0.7, 0.7, 1.0);
+
 	//  Load shaders and initialize attribute buffers
     var program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
 
-    //  setup the viewport and initial colour
-	gl.viewport(0, 0, canvas.width, canvas.height);
-	gl.clearColor(0.7, 0.7, 0.7, 1.0);
+
 
 	//  Setup a GPU buffer for data
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+
+    // prepare buffer storage area
     gl.bufferData( gl.ARRAY_BUFFER, sizeof['vec3'] * maxVertices, gl.STATIC_DRAW );
 
     // Associate our shader variables with our data buffer
@@ -44,9 +84,9 @@ window.onload = function() {
     gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
 
-    var cBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, sizeof['vec4'] * maxVertices, gl.STATIC_DRAW );
+    // var cBuffer = gl.createBuffer();
+    // gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
+    // gl.bufferData( gl.ARRAY_BUFFER, sizeof['vec4'] * maxVertices, gl.STATIC_DRAW );
 
     // Associate our shader variable with the data buffer
     // // var vColor = gl.getAttribLocation( program, "vColor" );
@@ -58,40 +98,10 @@ window.onload = function() {
     // be linked to the corresponding variable in the vertex shader.
     // The function gl.getUniformLocation performs the first step in the 
     // process by obtaining an identifier for the vertex shader variable vColor.
-    colLoc = gl.getUniformLocation(program, "uColour");
+    colLoc = gl.getUniformLocation(program, "fColour");
 
     /* ********************************************************************** */
-    canvas.addEventListener("mousedown", function(event){
-        gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
-        // Allow for canvas bounding box and record vertex
-		var rect = canvas.getBoundingClientRect();
-        var t = 
-            vec3( 2 * (event.clientX-rect.left) / canvas.width - 1, 
-                    2 * (canvas.height- (event.clientY-rect.top) ) / canvas.height - 1, 0);
-        gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3'] * index, flatten(t));
-        // add the vertex to the array for testing
-        vertices.push(t);
 
-        // change buffer for colour selection
-        
-        // gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
-        if (index % 2 == 0)
-            colour = RED;
-        else 
-            colour = GREEN;
-
-        t = index % 2 == 0 ? GREEN : RED; //vec4(colors[(index)%7]);
-        // gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec4']*index, flatten(t));
-        
-        index++;
-        //state();
-
-        if (index > 2){
-            clockwise = RHTwinding(vertices);
-            console.log("clockwise = " + clockwise);
-        }
-        render();
-    });
 
 
     // Handle the slider event 
@@ -113,12 +123,15 @@ window.onload = function() {
 }
 
 function render(){
+    var colour;
     // cleans the screen paints canvas 
     gl.clear( gl.COLOR_BUFFER_BIT );
-    gl.uniform4fv(colLoc, flatten(RED));
+    // gl.uniform4fv(colLoc, flatten(RED));
 
     if (index == vCount) {
         console.log("paint triangle");
+        colour = RED;
+        gl.uniform4fv(colLoc, flatten(colour));
         gl.drawArrays(gl.TRINGLES,0,index);
     }
 

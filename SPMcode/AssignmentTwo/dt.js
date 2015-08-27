@@ -4,10 +4,11 @@
 
 var gl;
 
-var vertices = [];
+// var vertices = [];
 var count = 0;
 
 var NumVertices = 3;
+var maxVertices = 10;
 
 var GREEN = vec4(0.0, 1.0, 0.0, 1.0);
 var RED = vec4(1.0, 0.0, 0.0, 1.0);
@@ -23,14 +24,28 @@ window.onload = function init()
     canvas.addEventListener("mousedown", function(event){
 		// Allow for canvas bounding box and record vertex
 		var rect = canvas.getBoundingClientRect();
-        vertices[count++] = vec3(2*(event.clientX-rect.left)/canvas.width-1,
+
+        var t = vec3(2*(event.clientX-rect.left)/canvas.width-1,
            2*(canvas.height-(event.clientY-rect.top))/canvas.height-1, 0);
 
+        gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3'] * count, flatten(t));
+
+        // vertices.push( t );
+        console.log(t);
+        // vertices[count++] = vec3(2*(event.clientX-rect.left)/canvas.width-1,
+        //    2*(canvas.height-(event.clientY-rect.top))/canvas.height-1, 0);
+
+        console.log(count);
+        count++;
+        
         // After all vertices entered send data to buffer and render
         if (count == NumVertices) {
-			gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
-			render();
+			// gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
+			render(); 
 		}
+
+
+
     });
 
     //
@@ -48,6 +63,9 @@ window.onload = function init()
 
     var bufferId = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
+
+    // perpare buffer 
+    gl.bufferData( gl.ARRAY_BUFFER, sizeof['vec3'] * maxVertices, gl.STATIC_DRAW );
 
     // Associate our shader variables with our data buffer
 
@@ -74,9 +92,10 @@ function render() {
     // Render triangle only if defined
     // Rendering colour depends on whether winding is anticlockwise
     if (count == NumVertices) {
-		colour = RHTwinding(vertices) ? GREEN : RED;
+		// colour = RHTwinding(vertices) ? GREEN : RED;
+        colour = RED;
         gl.uniform4fv(colLoc, flatten(colour));
-        gl.drawArrays(gl.TRIANGLES, 0, vertices.length);
+        gl.drawArrays(gl.TRIANGLES, 0, count);
         count = 0;	// Allow user to repeat after each rendering
 	}
 }

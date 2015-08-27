@@ -1,18 +1,18 @@
 
 
 var gl;
+
 var vertices = []; // array of vec3 vertices
-
 var count = 0;
-var NumVertices = 3;
 
+var NumVertices = 3;
 var maxVertices = 3;
-var winding = 1;
 
 var GREEN = vec4(0.0, 1.0, 0.0, 1.0);
 var RED = vec4(1.0, 0.0, 0.0, 1.0);
 var colLoc;
 
+// var winding = 1;
 var clockwise = false;
 
 window.onload = function() {
