@@ -12,7 +12,7 @@ var RED         = vec4(1.0, 0.0, 0.0, 1.0);
 var BLACK       = vec4(0.0, 0.0, 0.0, 1.0);
 var colLoc;
 
-var rotation;
+var rotation;// represents the winding direction of triangle
 
 window.onload = function() 
 {
@@ -127,9 +127,17 @@ function check() {
     console.log(checkRotation);
 
     showArray(vertices);
-    var last = vertices.slice(index - 2, index - 1) ;
-    console.log(last.length);
-    showLocation(last);
+
+    var last = vertices.slice ( - 2 );
+    var first = vertices.slice ( 0, index -2 );
+
+    for (var i = 0 ; i < first.length; i++) {
+        var vlist = last.concat(first[i], first[i+1]);
+        console.log("vlist " + vlist.length)
+    }
+
+    showArray ( first );
+    showArray ( last );
 }
 
 // Tests if the line segments are intersecting
@@ -173,6 +181,7 @@ function reset(){
 function showLocation(u) {
     // logs selected vertex information to console
     console.log("[" + u[0] + ":" + u[1] + ":" + u[2] + "]" );
+    console.log(u.length);
 }
 
 // Tests if the winding is anticlockwise (Right Hand Thumb rule)
