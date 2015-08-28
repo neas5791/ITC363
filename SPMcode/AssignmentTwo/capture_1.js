@@ -13,6 +13,7 @@ var BLACK       = vec4(0.0, 0.0, 0.0, 1.0);
 var colLoc;
 
 var rotation;// represents the winding direction of triangle
+var isIntersect;// represents whether lines intersect
 
 window.onload = function() 
 {
@@ -65,23 +66,30 @@ window.onload = function()
                     2 * (canvas.height- (event.clientY-rect.top) ) / canvas.height - 1, 0);
         gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3'] * index, flatten(t));
 
+        console.log("index: " + index + " = " + t);
+
         vertices[index] = t;
 
-        if (index == 2) {
-
+        if (!checkRotation()) { 
+            error(); 
+            return;
         }
+
         if (index < vCount) {
             index++;
-        }
+        } 
 
-        console.log(index);
+        // console.log(index);
         
-        if (index > 2){
-            rotation = RHTwinding(vertices);
-            console.log("rotation = " + rotation);
-            check();
-            render();
-        }
+
+
+        // if (index > 2){
+        //     rotation = RHTwinding(vertices);
+        //     console.log("rotation = " + rotation);
+
+        //     // check();
+        //     render();
+        // }
 
         render();
     });
@@ -114,10 +122,27 @@ function render(){
     }
 }
 
+function error() {
+    console.log(vertices.length);
+    console.log("index = " + index);
+    var colour = checkRotation() ? BLACK : RED;
+    console.log(colour);
+    // cleans the screen paints canvas 
+    gl.clear( gl.COLOR_BUFFER_BIT );
+ 
+    gl.uniform4fv(colLoc, flatten(BLACK));
+    gl.drawArrays(gl.LINE_STRIP, 0, index );
+    // set fragment shader variable fColour to RED
+    // draw the lines that represents the last segement
+    // that does not meet criteria
+    gl.uniform4fv(colLoc, flatten(colour));
+    gl.drawArrays(gl.LINE_STRIP, index - 1, 2);
+}
+
 function check() {
     var checkRotation;
 
-    if (index == 3 ){
+    if (index <= 3 ){
         checkRotation = true;
     }
     else {
@@ -139,6 +164,39 @@ function check() {
     showArray ( first );
     showArray ( last );
 }
+
+// sets global variable rotation, true value represents a RH winding direction.
+// it is assumed that all vertices stored in the vertices[], and that the array has
+// more than three values stored.
+// returns true if winding direction is acceptable for triangle_strip windings
+function checkRotation(){
+    if (index < 2 ){
+        return true;
+    }
+    else if (index == 2) {
+        rotation = RHTwinding(vertices);
+        return true;
+    }
+    else if (index > 2) {
+        // check that the winding of the currrent traingle are not equal to previous triangle
+        // requirment of a triangle_strip
+        var isCorrect = RHTwinding(vertices) != rotation ? true : false;
+        
+        if (isCorrect) {
+            rotation = !rotation;
+        }
+
+        return isCorrect;
+    }
+}
+
+// checks and set global variable isIntersecting
+function checkIntersection(){
+
+}
+
+
+
 
 // Tests if the line segments are intersecting
 // vlist is an array containing 4 2D points in order P0, P1, Q0, Q1
