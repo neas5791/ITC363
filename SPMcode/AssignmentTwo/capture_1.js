@@ -118,10 +118,10 @@ function render(){
 }
 
 function error() {
-    console.log(vertices.length);
-    console.log("index = " + index);
+    console.log("Error on vertex " + index);
+    console.log("Please select another point");
     var colour = checkWindings() ? BLACK : RED;
-    console.log(colour);
+
     // cleans the screen paints canvas 
     gl.clear( gl.COLOR_BUFFER_BIT );
  
@@ -165,7 +165,6 @@ function check() {
 // has more than three values stored. returns true if winding direction is
 // acceptable for triangle_strip windings
 function checkWindings(){
-    console.log("hmmm");
     // check if there is less than three vertices to inspect
     if (index < 2 ){
         return true;
