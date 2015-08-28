@@ -10,6 +10,7 @@ var maxVertices = 10;
 var GREEN       = vec4(0.0, 1.0, 0.0, 1.0);
 var RED         = vec4(1.0, 0.0, 0.0, 1.0);
 var BLACK       = vec4(0.0, 0.0, 0.0, 1.0);
+var BLUE        = vec4(51.0/255.0,51.0/255.0, 1.0, 1.0);
 var colLoc;
 
 var rotation;// represents the winding direction of triangle
@@ -62,34 +63,28 @@ window.onload = function()
         var rect = canvas.getBoundingClientRect();
 
         var t = 
-            vec3( 2 * (event.clientX-rect.left) / canvas.width - 1, 
-                    2 * (canvas.height- (event.clientY-rect.top) ) / canvas.height - 1, 0);
+            vec3( 2 * ( event.clientX - rect.left ) / canvas.width - 1, 
+                  2 * ( canvas.height - ( event.clientY - rect.top ) 
+                  ) / canvas.height - 1, 
+                  0);
+
         gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3'] * index, flatten(t));
 
-        console.log("index: " + index + " = " + t);
+        // console.log("index: " + index + " = " + t);
 
         vertices[index] = t;
 
-        if (!checkRotation()) { 
+        // check windings
+        if ( index != vCount && !checkWindings() ) { 
             error(); 
             return;
         }
 
+        // increment index only while index is less 
+        // than the number of required vertices
         if (index < vCount) {
             index++;
         } 
-
-        // console.log(index);
-        
-
-
-        // if (index > 2){
-        //     rotation = RHTwinding(vertices);
-        //     console.log("rotation = " + rotation);
-
-        //     // check();
-        //     render();
-        // }
 
         render();
     });
@@ -109,7 +104,7 @@ function render(){
     if (index == vCount){
         // set fragment shader variable fColour to RED
         // draw the triangle strip
-        gl.uniform4fv(colLoc, flatten(RED));
+        gl.uniform4fv(colLoc, flatten(BLUE));
         gl.drawArrays( gl.TRIANGLE_STRIP, 0 , index );
         // set fragment shader variable fColour to GREEN
         // draw the lines already proven to be acceptable
@@ -125,7 +120,7 @@ function render(){
 function error() {
     console.log(vertices.length);
     console.log("index = " + index);
-    var colour = checkRotation() ? BLACK : RED;
+    var colour = checkWindings() ? BLACK : RED;
     console.log(colour);
     // cleans the screen paints canvas 
     gl.clear( gl.COLOR_BUFFER_BIT );
@@ -166,20 +161,22 @@ function check() {
 }
 
 // sets global variable rotation, true value represents a RH winding direction.
-// it is assumed that all vertices stored in the vertices[], and that the array has
-// more than three values stored.
-// returns true if winding direction is acceptable for triangle_strip windings
-function checkRotation(){
+// it is assumed that all vertices stored in the vertices[], and that the array
+// has more than three values stored. returns true if winding direction is
+// acceptable for triangle_strip windings
+function checkWindings(){
+    console.log("hmmm");
+    // check if there is less than three vertices to inspect
     if (index < 2 ){
         return true;
-    }
+    } // set initial rotation based on current winding
     else if (index == 2) {
         rotation = RHTwinding(vertices);
         return true;
     }
     else if (index > 2) {
-        // check that the winding of the currrent traingle are not equal to previous triangle
-        // requirment of a triangle_strip
+        // check that the winding of the currrent traingle are not equal to
+        // previous triangle requirment of a triangle_strip
         var isCorrect = RHTwinding(vertices) != rotation ? true : false;
         
         if (isCorrect) {
@@ -248,7 +245,9 @@ function RHTwinding(vlist) {
 
     // Argument is assumed an array of 3 3D points in order P0, P1, P2
     // Calculate cross product (P1-P0)x(P2-P0)
-    var norm = cross(subtract(vlist[ i - 2 ], vlist[ i - 3 ]), subtract(vlist[ i - 1 ], vlist[ i - 3 ]));
+    var norm = cross ( subtract ( vlist[ i - 2 ], vlist[ i - 3 ] ),
+                        subtract( vlist[ i - 1 ], vlist[ i - 3 ] ) );
+    
     return norm[2] >= 0;
 }
 
