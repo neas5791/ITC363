@@ -58,7 +58,7 @@ window.onload = function()
     };
 
     canvas.addEventListener("mousedown", function(event){
-
+        console.log("index: " + index);
         // Allow for canvas bounding box and record vertex
         var rect = canvas.getBoundingClientRect();
 
@@ -76,6 +76,7 @@ window.onload = function()
 
         // check windings
         if ( index != vCount && !checkWindings() ) { 
+        // if ( !isComplete() && !checkWindings() ) { 
             error(); 
             return;
         }
@@ -132,32 +133,6 @@ function error() {
     // that does not meet criteria
     gl.uniform4fv(colLoc, flatten(colour));
     gl.drawArrays(gl.LINE_STRIP, index - 1, 2);
-}
-
-function check() {
-    var checkRotation;
-
-    if (index <= 3 ){
-        checkRotation = true;
-    }
-    else {
-        checkRotation = RHTwinding(vertices) == rotation ? true : false;   
-    }
-
-    console.log(checkRotation);
-
-    showArray(vertices);
-
-    var last = vertices.slice ( - 2 );
-    var first = vertices.slice ( 0, index -2 );
-
-    for (var i = 0 ; i < first.length; i++) {
-        var vlist = last.concat(first[i], first[i+1]);
-        console.log("vlist " + vlist.length)
-    }
-
-    showArray ( first );
-    showArray ( last );
 }
 
 // sets global variable rotation, true value represents a RH winding direction.
