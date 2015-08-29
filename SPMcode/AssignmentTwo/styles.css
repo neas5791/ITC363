@@ -4,29 +4,37 @@
     background-color: #ffcc33;
     float: left;
     margin: auto;
+    border:1px solid black;
 }
 #resetButton {
     width: 33%;
     float: left;
-    height: 30;
+    height: 30px;
     
 }
 #listButton {
     width: 33%;
+    height: 50px;
     float: left;
-    height: 30;
+    height: 30px;
 }
 #counter
 {
     width: 33%;
+    height: 50px;
     float:left;
-    height: 30;
+    height: 30px;
 }
 
 button{
+    height:20px; 
+    width:100px; 
+
+    margin: -20px -50px; 
 
     position: relative;
     top:50%;
+    left:50%;
 }
 
 #clear {

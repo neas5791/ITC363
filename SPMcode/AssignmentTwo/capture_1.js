@@ -3,22 +3,21 @@
 var gl;
 var vertices    = []; // array of vec3 vertices
 
-var index       = 0;
-var vCount      = 5;
-var maxVertices = 11; //
+var index       = 0; // current count of vertices
+var vCount      = 5; // number of vertices use wishes to display
+var maxVertices = 11; // maximum number of vertices buffer can accomodate
 
 var GREEN       = vec4(0.0, 1.0, 0.0, 1.0);
 var RED         = vec4(1.0, 0.0, 0.0, 1.0);
 var BLACK       = vec4(0.0, 0.0, 0.0, 1.0);
 var BLUE        = vec4(51.0/255.0,51.0/255.0, 1.0, 1.0);
-var colLoc;
+var colLoc; // frag_shader variable for the colour
 
-var rotation;// represents the winding direction of triangle
-var isIntersect;// represents whether lines intersect
-var edges       = [];// is a pair of vertices on triangle
+var rotation; // represents the winding direction of triangle
+var isIntersect; // represents whether lines intersect
+var edges       = []; // each element is a pair of vertices on triangle 
 
-window.onload = function() 
-{
+window.onload = function() {
     var canvas = document.getElementById("gl-canvas");
     setHtmlUi();
     gl = WebGLUtils.setupWebGL(canvas);
@@ -69,34 +68,33 @@ window.onload = function()
 
         gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3'] * index, flatten(t));
 
-        // console.log("index: " + index + " = " + t);
-
         vertices[index] = t;
 
-        // check windings and intersections while required number of vertices not reached
+        // test windings and intersections 
+        // while required number of vertices not reached
         if ( index != vCount ) {
-            // the below code works 
+            // check windings direction 
             if ( !checkWindings() ) { 
                 console.log("Wrong winding");
                 error(); 
                 return;
             }
             
-
+            // check if the last segement intersect with any other existing edge
             if (checkIntersection() ) {
                 console.log("intersection found");
                 error();
                 return;
             }
 
+            // if the addition of the last vertex passes winding and intersection testing
+            // add the new edge to the edge array.
             if (index >= 1) {
                 edges.push( [ vertices[index - 1], vertices[index] ] );
                 if (index >= 2) {
                     edges.push( [ vertices[index], vertices[index - 2] ] );
                 }
             }
-
-            console.log("after intersection check");
         }
 
         // increment index only while index is less than the number of required vertices
@@ -104,7 +102,9 @@ window.onload = function()
             index++;
         } 
 
+        // update the HTML UI display with count of how many vertices are selected
         setHtmlUi();
+
         render();
     });
     
@@ -116,7 +116,6 @@ function render(){
     // cleans the screen paints canvas 
     gl.clear( gl.COLOR_BUFFER_BIT );
     
-
     gl.uniform4fv(colLoc, flatten(BLACK));
     gl.drawArrays(gl.LINE_STRIP, 0, index);
 
@@ -145,18 +144,17 @@ function error() {
  
     gl.uniform4fv(colLoc, flatten(BLACK));
     gl.drawArrays(gl.LINE_STRIP, 0, index );
-    // set fragment shader variable fColour to RED
-    // draw the lines that represents the last segement
-    // that does not meet criteria
+    // set fragment shader variable fColour to RED draw the lines 
+    // that represents the last segement that does not meet criteria
     gl.uniform4fv(colLoc, flatten(RED));
     gl.drawArrays(gl.LINE_STRIP, index - 1, 2);
 }
-
 
 // Checks the winding direction of a set of vetices and compares the result with last 
 // winding result which is stored in the rotation variable.
 // returns true if winding direction is acceptable for triangle_strip windings
 function checkWindings(){
+    // console.log("checkWindings");
     // check if there is less than three vertices to inspect
     if (index < 2 ){
         return true;
@@ -166,13 +164,10 @@ function checkWindings(){
         // console.log(rotation);
         return true;
     }
-    else if (index > 2) {
+    //else if (index > 2) {
+    else {
         // windings is what the rotation should be based on the index
         var windings = ( index % 2 ) == 0 ? rotation : !rotation;
-        
-        /* these two variable were used to output information to console */
-        // var t1 = windings == true ? "RHT" : "LHT";
-        // var t2 = RHTwinding(vertices) == true ? "RHT" : "LHT";
         
         // check that the winding of the currrent traingle are not equal to
         // previous triangle requirment of a triangle_strip
@@ -206,7 +201,6 @@ function checkIntersection(){
 
     return false;
 }
-
 
 // Tests if the line segments are intersecting
 // vlist is an array containing 4 2D points in order P0, P1, Q0, Q1
@@ -251,9 +245,10 @@ function clearCanvas() {
     console.log("clearCanvas called");
 }
 
-function setHtmlUi(){
+function setHtmlUi() {
     document.getElementById("count").innerHTML = index + " of " + vCount + " selected";
 }
+
 /* *** UTILITY FUNCTIONS BELOW *** */
 function state(){
     // logs current state to console
