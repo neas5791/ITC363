@@ -22,6 +22,8 @@ var colLoc; // frag_shader variable for the colour
 var matLoc; // shader program location of modelview
 var thetaLoc; // vertex_shader rotation variable
 var trans       = [0.0,0.0,0.0]; // displacement of triangle's origin
+var mv; // the transformation matrix
+
 
 window.onload = function() {
     // console.log(String.fromCharCode(27));
@@ -50,7 +52,7 @@ window.onload = function() {
 
     colLoc = gl.getUniformLocation(program, "fColour");
     matLoc = gl.getUniformLocation(program, "modelview");
-    thetaLoc = gl.getUniformLocation( program, "theta" );
+    // thetaLoc = gl.getUniformLocation( program, "theta" );
 
     document.getElementById("slider").onchange = function(event) {
         // set variable to slider value
@@ -108,8 +110,9 @@ window.onload = function() {
         if ( index < vCount ) {
             index++;
         } 
-        // else {
-        //     doModel();
+        
+        // if (index == vCount ) {
+        //     getCentre();
         // }
 
         // update the HTML UI display with count of how many vertices are selected
@@ -174,11 +177,9 @@ function render(){
     // cleans the screen paints canvas 
     gl.clear( gl.COLOR_BUFFER_BIT );
 
-
-
     mv = translate(trans);
     gl.uniformMatrix4fv(matLoc, false, flatten(mv));
-    gl.uniform1f( thetaLoc, theta );
+    // gl.uniform1f( thetaLoc, theta );
     gl.uniform4fv(colLoc, flatten(BLACK));
     gl.drawArrays(gl.LINE_STRIP, 0, index);
 
@@ -296,10 +297,12 @@ function RHTwinding(vlist) {
     return norm[2] >= 0;
 }
 
-// Model the vertices entered
-function doModel() {
+// get the centre of the polygon by averaging the vertices entered
+function getCentre() {
+    console.log("getCentre");
+    console.log(trans);
     // Calculate model origin for triangle by averaging vertices
-    trans = vec3();
+    // trans = vec3();
     for (var i = 0; i < vCount; i++) {
         trans = add(trans, vertices[i]);
     }
@@ -327,7 +330,23 @@ function clearCanvas() {
 }
 
 function setHtmlUi() {
+    // sets the count div
     document.getElementById("count").innerHTML = index + " of " + vCount + " selected";
+}
+
+function centrePolygon(){
+    trans = vec3();
+
+    // trans=scale(-1, trans);
+    // render();
+    console.log(trans);
+    getCentre();
+    console.log(trans);
+    trans = scale(-1, trans);
+    // mv = translate(trans);
+
+    console.log(trans);
+    // render();
 }
 
 /* *** UTILITY FUNCTIONS BELOW *** */
