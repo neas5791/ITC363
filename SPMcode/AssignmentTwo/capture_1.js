@@ -28,7 +28,10 @@ var mv; // the transformation matrix
 window.onload = function() {
     // console.log(String.fromCharCode(27));
     var canvas = document.getElementById("gl-canvas");
+    
     setHtmlUi();
+
+    mv = mat4(); // set mv with identity matrix
     gl = WebGLUtils.setupWebGL(canvas);
     if (!gl) {
         alert("WebGL isn't available");
@@ -128,25 +131,29 @@ window.onload = function() {
           case 87:
             // w key
             console.log(String.fromCharCode(key));
-            trans = add(trans, [0, 0.01, 0]);
+            move([0,0.01,0]);
+            // trans = add(trans, [0, 0.01, 0]);
             break;
           case 115:
           case 83:
             // s key
             console.log(String.fromCharCode(key));
-            trans = add(trans, [0, -0.01, 0]);
+            move([0,-0.01,0]);
+            // trans = add(trans, [0, -0.01, 0]);
             break;
           case 97:
           case 65:
             // a key
             console.log(String.fromCharCode(key));
-            trans = add(trans, [-0.01, 0, 0]);
+            move([-0.01, 0, 0]);
+            // trans = add(trans, [-0.01, 0, 0]);
             break;
           case 100:
           case 68:
             // d key
             console.log(String.fromCharCode(key));
-            trans = add(trans, [0.01, 0, 0]);
+            move([0.01, 0, 0]);
+            // trans = add(trans, [0.01, 0, 0]);
             break;
           case 27:
             // escape key
@@ -177,7 +184,9 @@ function render(){
     // cleans the screen paints canvas 
     gl.clear( gl.COLOR_BUFFER_BIT );
 
-    mv = translate(trans);
+    console.log(trans);
+
+    // mv = translate(trans);
     gl.uniformMatrix4fv(matLoc, false, flatten(mv));
     // gl.uniform1f( thetaLoc, theta );
     gl.uniform4fv(colLoc, flatten(BLACK));
@@ -299,18 +308,18 @@ function RHTwinding(vlist) {
 
 // get the centre of the polygon by averaging the vertices entered
 function getCentre() {
-    console.log("getCentre");
-    console.log(trans);
+    centre = vec3();
     // Calculate model origin for triangle by averaging vertices
     // trans = vec3();
     for (var i = 0; i < vCount; i++) {
-        trans = add(trans, vertices[i]);
+        centre = add(centre, vertices[i]);
     }
-    trans = scale(1/vCount, trans);
+    centre = scale(1/vCount, centre);
     // Reset vertices with respect to model origin
     for (i = 0; i < vCount; i++) {
-        vertices[i] = subtract(vertices[i], trans);
+        vertices[i] = subtract(vertices[i], centre);
     }
+
     console.log(trans);
 }
 
@@ -319,6 +328,7 @@ function reset(){
     edges = [];
     index = 0;
     trans = [0.0, 0.0, 0.0];
+    mv = mat4();
     setHtmlUi();
 }
 
@@ -335,18 +345,29 @@ function setHtmlUi() {
 }
 
 function centrePolygon(){
-    trans = vec3();
+    var centre = vec3();
+    for (var i = 0; i < vCount; i++) {
+        centre = add(centre, vertices[i]);
+    }
+    centre = scale(-1/vCount, centre);
+    for (i = 0; i < vCount; i++) {
+        vertices[i] = subtract(vertices[i], centre);
+    }
+    console.log(centre);
 
-    // trans=scale(-1, trans);
-    // render();
-    console.log(trans);
-    getCentre();
-    console.log(trans);
-    trans = scale(-1, trans);
-    // mv = translate(trans);
+    mv = mult(mv, translate(centre));
 
+    // trans = vec3();
+
+    render();
+}
+
+function move(translation){
     console.log(trans);
-    // render();
+    trans = add(trans, translation);
+    console.log(trans);
+    
+    mv = mult(mv, translate(trans));
 }
 
 /* *** UTILITY FUNCTIONS BELOW *** */
