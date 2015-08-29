@@ -11,13 +11,20 @@ var GREEN       = vec4(0.0, 1.0, 0.0, 1.0);
 var RED         = vec4(1.0, 0.0, 0.0, 1.0);
 var BLACK       = vec4(0.0, 0.0, 0.0, 1.0);
 var BLUE        = vec4(51.0/255.0,51.0/255.0, 1.0, 1.0);
-var colLoc; // frag_shader variable for the colour
+
 
 var rotation; // represents the winding direction of triangle
 var isIntersect; // represents whether lines intersect
 var edges       = []; // each element is a pair of vertices on triangle 
+var theta       = 0.0;
+
+var colLoc; // frag_shader variable for the colour
+var matLoc; // shader program location of modelview
+var thetaLoc; // vertex_shader rotation variable
+var trans       = [0.0,0.0,0.0]; // displacement of triangle's origin
 
 window.onload = function() {
+    // console.log(String.fromCharCode(27));
     var canvas = document.getElementById("gl-canvas");
     setHtmlUi();
     gl = WebGLUtils.setupWebGL(canvas);
@@ -42,7 +49,8 @@ window.onload = function() {
     gl.enableVertexAttribArray(vPosition);
 
     colLoc = gl.getUniformLocation(program, "fColour");
-
+    matLoc = gl.getUniformLocation(program, "modelview");
+    thetaLoc = gl.getUniformLocation( program, "theta" );
 
     document.getElementById("slider").onchange = function(event) {
         // set variable to slider value
@@ -58,7 +66,6 @@ window.onload = function() {
     };
 
     canvas.addEventListener("mousedown", function(event){
-
         // Allow for canvas bounding box and record vertex
         var rect = canvas.getBoundingClientRect();
 
@@ -101,6 +108,9 @@ window.onload = function() {
         if ( index < vCount ) {
             index++;
         } 
+        // else {
+        //     doModel();
+        // }
 
         // update the HTML UI display with count of how many vertices are selected
         setHtmlUi();
@@ -108,6 +118,54 @@ window.onload = function() {
         render();
     });
     
+    window.onkeydown = function( event ) {
+        var key = event.keyCode;
+        switch( key ) {
+          case 119:
+          case 87:
+            // w key
+            console.log(String.fromCharCode(key));
+            trans = add(trans, [0, 0.01, 0]);
+            break;
+          case 115:
+          case 83:
+            // s key
+            console.log(String.fromCharCode(key));
+            trans = add(trans, [0, -0.01, 0]);
+            break;
+          case 97:
+          case 65:
+            // a key
+            console.log(String.fromCharCode(key));
+            trans = add(trans, [-0.01, 0, 0]);
+            break;
+          case 100:
+          case 68:
+            // d key
+            console.log(String.fromCharCode(key));
+            trans = add(trans, [0.01, 0, 0]);
+            break;
+          case 27:
+            // escape key
+            console.log("Esc");
+            clearCanvas();
+            break;
+          case 113:
+          case 81:
+            // q key
+            console.log(String.fromCharCode(key));
+            break;
+          case 101:
+          case 69:
+            // e key
+            console.log(String.fromCharCode(key));
+            break;
+        }
+
+        render();
+    };
+
+
     render();
 }
 
@@ -115,9 +173,16 @@ function render(){
     var colour;
     // cleans the screen paints canvas 
     gl.clear( gl.COLOR_BUFFER_BIT );
-    
+
+
+
+    mv = translate(trans);
+    gl.uniformMatrix4fv(matLoc, false, flatten(mv));
+    gl.uniform1f( thetaLoc, theta );
     gl.uniform4fv(colLoc, flatten(BLACK));
     gl.drawArrays(gl.LINE_STRIP, 0, index);
+
+    // Calculate the modelview matrix and send
 
     if (index == vCount){
         // set fragment shader variable fColour to RED
@@ -231,10 +296,26 @@ function RHTwinding(vlist) {
     return norm[2] >= 0;
 }
 
+// Model the vertices entered
+function doModel() {
+    // Calculate model origin for triangle by averaging vertices
+    trans = vec3();
+    for (var i = 0; i < vCount; i++) {
+        trans = add(trans, vertices[i]);
+    }
+    trans = scale(1/vCount, trans);
+    // Reset vertices with respect to model origin
+    for (i = 0; i < vCount; i++) {
+        vertices[i] = subtract(vertices[i], trans);
+    }
+    console.log(trans);
+}
+
 function reset(){
     vertices = [];
     edges = [];
     index = 0;
+    trans = [0.0, 0.0, 0.0];
     setHtmlUi();
 }
 
