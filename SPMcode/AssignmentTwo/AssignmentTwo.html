@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<link rel="stylesheet" href="styles.css">
 <title>ITC363 Assignment Two</title>
 
 <script id="vertex-shader" type="x-shader/x-vertex">
@@ -37,19 +38,25 @@
 
 <body>
 <div>
-<h3>
-Number of vertices 3 
-<input id="slider" type="range" min="3" max="10" step="1" value="5" />
- 10 </h3>
+  <h4>Select number of vertices <br>3 <input id="slider" type="range" min="3" max="10" step="1" value="5" />
+    10</h4>
 </div>
-<div>
-<h3 id="count">number of vertices</h3>
-</div>
+
+
 <canvas id="gl-canvas" width="512" height="512">
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
-<div>
-  <button onclick="clearCanvas()">Clear</button>
+
+<div id="footer">
+  <div id="resetButton">
+    <button id="reset" onclick="clearCanvas()">Clear</button>
+  </div>
+  <div id="listButton">
+    <button onclick="build_list_of_lines()">List</button>
+  </div>
+  <div id="counter">
+    <p id="count">number of vertices</p>
+  </div>
 </div>
 
 </body>

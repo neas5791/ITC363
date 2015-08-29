@@ -5,7 +5,7 @@ var vertices    = []; // array of vec3 vertices
 
 var index       = 0;
 var vCount      = 5;
-var maxVertices = 10;
+var maxVertices = 11; //
 
 var GREEN       = vec4(0.0, 1.0, 0.0, 1.0);
 var RED         = vec4(1.0, 0.0, 0.0, 1.0);
@@ -15,11 +15,12 @@ var colLoc;
 
 var rotation;// represents the winding direction of triangle
 var isIntersect;// represents whether lines intersect
+var edges       = [];// is a pair of vertices on triangle
 
 window.onload = function() 
 {
     var canvas = document.getElementById("gl-canvas");
-    document.getElementById("count").innerHTML = vCount;
+    setHtmlUi();
     gl = WebGLUtils.setupWebGL(canvas);
     if (!gl) {
         alert("WebGL isn't available");
@@ -62,11 +63,9 @@ window.onload = function()
         // Allow for canvas bounding box and record vertex
         var rect = canvas.getBoundingClientRect();
 
-        var t = 
-            vec3( 2 * ( event.clientX - rect.left ) / canvas.width - 1, 
-                  2 * ( canvas.height - ( event.clientY - rect.top ) 
-                  ) / canvas.height - 1, 
-                  0);
+        var t = vec3 ( 2 * ( event.clientX - rect.left ) / canvas.width - 1, 
+                        2 * ( canvas.height - ( event.clientY - rect.top ) ) / canvas.height - 1, 
+                         0 );
 
         gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3'] * index, flatten(t));
 
@@ -74,18 +73,38 @@ window.onload = function()
 
         vertices[index] = t;
 
-        // check windings
-        if ( index != vCount && !checkWindings() ) { 
-            error(); 
-            return;
+        // check windings and intersections while required number of vertices not reached
+        if ( index != vCount ) {
+            // the below code works 
+            if ( !checkWindings() ) { 
+                console.log("Wrong winding");
+                error(); 
+                return;
+            }
+            
+
+            if (checkIntersection() ) {
+                console.log("intersection found");
+                error();
+                return;
+            }
+
+            if (index >= 1) {
+                edges.push( [ vertices[index - 1], vertices[index] ] );
+                if (index >= 2) {
+                    edges.push( [ vertices[index], vertices[index - 2] ] );
+                }
+            }
+
+            console.log("after intersection check");
         }
 
-        // increment index only while index is less 
-        // than the number of required vertices
-        if (index < vCount) {
+        // increment index only while index is less than the number of required vertices
+        if ( index < vCount ) {
             index++;
         } 
 
+        setHtmlUi();
         render();
     });
     
@@ -118,9 +137,8 @@ function render(){
 }
 
 function error() {
-    console.log("Error on vertex " + index);
-    console.log("Please select another point");
-    var colour = checkWindings() ? BLACK : RED;
+    // console.log("Error on vertex " + index);
+    // console.log("Please select another point");
 
     // cleans the screen paints canvas 
     gl.clear( gl.COLOR_BUFFER_BIT );
@@ -130,40 +148,14 @@ function error() {
     // set fragment shader variable fColour to RED
     // draw the lines that represents the last segement
     // that does not meet criteria
-    gl.uniform4fv(colLoc, flatten(colour));
+    gl.uniform4fv(colLoc, flatten(RED));
     gl.drawArrays(gl.LINE_STRIP, index - 1, 2);
 }
 
-function check() {
-    var checkRotation;
 
-    if (index <= 3 ){
-        checkRotation = true;
-    }
-    else {
-        checkRotation = RHTwinding(vertices) == rotation ? true : false;   
-    }
-
-    console.log(checkRotation);
-
-    showArray(vertices);
-
-    var last = vertices.slice ( - 2 );
-    var first = vertices.slice ( 0, index -2 );
-
-    for (var i = 0 ; i < first.length; i++) {
-        var vlist = last.concat(first[i], first[i+1]);
-        console.log("vlist " + vlist.length)
-    }
-
-    showArray ( first );
-    showArray ( last );
-}
-
-// sets global variable rotation, true value represents a RH winding direction.
-// it is assumed that all vertices stored in the vertices[], and that the array
-// has more than three values stored. returns true if winding direction is
-// acceptable for triangle_strip windings
+// Checks the winding direction of a set of vetices and compares the result with last 
+// winding result which is stored in the rotation variable.
+// returns true if winding direction is acceptable for triangle_strip windings
 function checkWindings(){
     // check if there is less than three vertices to inspect
     if (index < 2 ){
@@ -171,32 +163,55 @@ function checkWindings(){
     } // set initial rotation based on current winding
     else if (index == 2) {
         rotation = RHTwinding(vertices);
+        // console.log(rotation);
         return true;
     }
     else if (index > 2) {
+        // windings is what the rotation should be based on the index
+        var windings = ( index % 2 ) == 0 ? rotation : !rotation;
+        
+        /* these two variable were used to output information to console */
+        // var t1 = windings == true ? "RHT" : "LHT";
+        // var t2 = RHTwinding(vertices) == true ? "RHT" : "LHT";
+        
         // check that the winding of the currrent traingle are not equal to
         // previous triangle requirment of a triangle_strip
-        var isCorrect = RHTwinding(vertices) != rotation ? true : false;
-        
-        if (isCorrect) {
-            rotation = !rotation;
-        }
-
-        return isCorrect;
+        return RHTwinding(vertices) == windings ? true : false;
     }
 }
 
-// checks and set global variable isIntersecting
+// checks that line segmentsdo not intersect
+// returns true if intersection is found with any other line segment
+// It is assumed that checkIntersection is run after a windings check
+// has been confirmed as acceptable.
 function checkIntersection(){
+    // console.log("checkIntersection");
+    if (index <= 2)
+        return false;
 
+    var test_intersection = [];
+
+    for ( var i = 0; i < edges.length; i++) {
+
+        Array.prototype.push.apply(test_intersection, edges[i]);
+        test_intersection.push(vertices[index -1], vertices[index]);
+
+        if ( intersecting(test_intersection) ){
+            // interscetion found
+            console.log("intersection of the bad kind found grrrr!");
+            return true;
+        }
+        test_intersection = [];
+    }
+
+    return false;
 }
-
-
 
 
 // Tests if the line segments are intersecting
 // vlist is an array containing 4 2D points in order P0, P1, Q0, Q1
 function intersecting(vlist) {
+    // showArray(vlist);
     var pq = subtract(vlist[2], vlist[0]);  // The vector from P0 to Q0 (i.e. Q0-P0)
     var v = subtract(vlist[1], vlist[0]);   // The vector from P0 to P1
     var w = subtract(vlist[3], vlist[2]);   // The vector from Q0 to Q1
@@ -208,34 +223,6 @@ function intersecting(vlist) {
     var beta = -dot(pq, subtract(scale(v2,w), scale(vw,v)))/denom;
     // The intersection condition counts touching segments as not intersecting
     return alpha > 0.0 && alpha < 1.0 && beta > 0.0 && beta < 1.0;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-function isComplete() {
-    // test if index is equal to the number of vertex
-    return index == vCount ? true : false;
-}
-
-function reset(){
-    vertices = [];
-    index = 0;
-}
-
-function showLocation(u) {
-    // logs selected vertex information to console
-    console.log("[" + u[0] + ":" + u[1] + ":" + u[2] + "]" );
-    console.log(u.length);
 }
 
 // Tests if the winding is anticlockwise (Right Hand Thumb rule)
@@ -250,15 +237,24 @@ function RHTwinding(vlist) {
     return norm[2] >= 0;
 }
 
+function reset(){
+    vertices = [];
+    edges = [];
+    index = 0;
+    setHtmlUi();
+}
+
 function clearCanvas() {
     reset();
-
     render();
 
     console.log("clearCanvas called");
 }
 
-
+function setHtmlUi(){
+    document.getElementById("count").innerHTML = index + " of " + vCount + " selected";
+}
+/* *** UTILITY FUNCTIONS BELOW *** */
 function state(){
     // logs current state to console
     console.log("vertices length is " + vertices.length);
@@ -268,6 +264,24 @@ function state(){
 
 function showArray(arr){
     for (  i = 0; i < arr.length; i++ ) {
-        console.log("vertics["+ i +"] = "+ arr[i]);
+        console.log("vertices["+ i +"] = "+ arr[i]);
+    }
+}
+
+function showLocation(u) {
+    // logs selected vertex information to console
+    console.log("[" + u[0] + ":" + u[1] + ":" + u[2] + "]" );
+    console.log(u.length);
+}
+
+// reports contents of edges array to console
+function build_list_of_lines(){
+   var count = 0;
+
+    if (edges.length > 0){
+        do {
+            showArray(edges[count]);
+            count++;
+        }while (count != edges.length);
     }
 }
