@@ -5,7 +5,12 @@ var points;
 var matLoc; // shader program location of modelview
 var trans       = [0.0,0.0,0.0]; // displacement of triangle's origin
 var mv; // the transformation matrix
+var theta = 0;
+var vertices;
+var displacementX = [ 0.01, 0, 0 ]; // the positive amount to move the object when translating in X direction
+var displacementY = [ 0, 0.01, 0 ]; // the positive amount to move the object when translating in Y direction
 
+var trans2;
 
 window.onload = function init()
 {
@@ -19,7 +24,7 @@ window.onload = function init()
     
     // Four Vertices
     
-    var vertices = [
+    vertices = [
         vec2( -0.5, -0.5 ),
         vec2(  -0.5,  0.5 ),
         vec2(  0.5, 0.5 ),
@@ -57,33 +62,35 @@ window.onload = function init()
           case 87:
             // w key
             console.log(String.fromCharCode(key));
-            trans = add(trans, [0, 0.01, 0]);
-            mv = mat4();
-            mv = mult(mv, translate(trans));
+            
+            trans = add(trans, displacementY);
+            // mv = mat4();
+
+            mv = mult(mv, translate(displacementY));
             break;
           case 115:
           case 83:
             // s key
             console.log(String.fromCharCode(key));
-            trans = add(trans, [0, -0.01, 0]);
-            mv = mat4();
-            mv = mult(mv, translate(trans));
+            trans = add(trans, scale(-1, displacementY));
+            // mv = mat4();
+            mv = mult(mv, translate(scale(-1, displacementY)));
             break;
           case 97:
           case 65:
             // a key
             console.log(String.fromCharCode(key));
-            trans = add(trans, [-0.01, 0, 0]);
-            mv = mat4();
-            mv = mult(mv, translate(trans));
+            trans = add(trans, scale(-1,displacementX));
+            // mv = mat4();
+            mv = mult(mv, translate(scale(-1,displacementX)));
             break;
           case 100:
           case 68:
             // d key
             console.log(String.fromCharCode(key));
-            trans = add(trans, [0.01, 0, 0]);
-            mv = mat4();
-            mv = mult(mv, translate(trans));
+            trans = add(trans, displacementX);
+            // mv = mat4();
+            mv = mult(mv, translate(displacementX));
             break;
           case 27:
             // escape key
@@ -97,16 +104,40 @@ window.onload = function init()
             mv = mat4();
             mv = mult(mv, translate(trans));
             console.log(String.fromCharCode(key));
+            theta = 0;
             break;
           case 101:
           case 69:
             // e key
+
+            //home(); // sets trans2 to current position
+            theta++;
+            var moveCentre = scale(-1,trans);
+            var rotat = rotate(theta, [0,0,1]);
+            var movePo = scale(-1, moveCentre);
+
+            mv = mult(mv,translate(moveCentre));
+            mv = mult(mv,rotat);
+            mv = mult(mv,translate(movePo));
+
+            var bv = inverse
+/*          
+            var temp = trans;
+            mv =mat4();
             trans = add(trans, scale(-1, trans));
-            mv = mat4();
+            // mv = mat4();
             mv = mult(mv, translate(trans));
 
-            var rot = rotate(4, [0,0,2]);
+            theta++;
+            console.log(theta)
+            var rot = rotate(theta, [0,0,15]);
+            console.log(rot);
             mv = mult(mv, rot);
+
+            // mv = mat4();
+            mv = mult(mv, translate(temp));
+
+*/
             console.log(String.fromCharCode(key));
             break;
         }
@@ -130,6 +161,51 @@ function render() {
 
 // point is the vec3 vertices that represents the centre of the 
 function rotatep(angle, point){
+    var R = mat4();
+    var ctm = mat4();
 
+    var thetaX = Math.acos()
 
+}
+function movePolygon(){
+    trans = trans2;
+
+    console.log(trans2);
+
+    // trans = add(trans, [0, 0.01, 0]);
+    mv = mat4();
+    mv = mult(mv, translate(trans));
+    render();
+}
+function home() {
+     
+    // for ( var i = 0 ; i < vertices.length); i++){
+        
+
+    // }
+    ////console.log("trans is " + trans);
+
+    ////var temp = scale(-1, trans);
+    ////console.log("temp is " + temp);
+
+    ////trans = add(trans, temp);
+    trans2 = trans;
+    trans = [0,0,0];
+    mv = mat4();
+
+    // mv = mult(mat4(), mat4());
+    
+    render();   
+}
+
+function whereami(){
+    console.log("Where am I?");
+    console.log(trans);
+    console.log("**************");
+
+}
+function reset(){
+    mv = mat4();
+    trans = [0,0,0];
+    theta = 0;
 }
