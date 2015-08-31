@@ -10,7 +10,7 @@ var theta = 0;
 var vertices;
 var displacementX = [ 0.01, 0, 0 ]; // the positive amount to move the object when translating in X direction
 var displacementY = [ 0, 0.01, 0 ]; // the positive amount to move the object when translating in Y direction
-var displacementR = 45.0; // the positive amount to rotate the object about an axis
+var displacementR = 5.0; // the positive amount to rotate the object about an axis
 var trans2;
 
 
@@ -75,26 +75,33 @@ window.onload = function init()
             // gl_Position.y =  s * vPosition.x + c * vPosition.y;
 
 
-
-            var tX = -1* Math.sin(theta) * displacementY[1];//test
-            var tY = Math.cos(theta) * displacementY[1];//test
+            var thetaRadian = theta * Math.PI / 180.0;
+            var tY = Math.cos(thetaRadian) * displacementY[1];//test
+            var tX = 1 * Math.sin(thetaRadian) * displacementY[1];//test
 
             var t = [tX, tY, 0];// test
             
-            trans = add(trans, t);
+            movePolygon(t);            
+            // trans = add(trans, t);
 
-            // trans = add(trans, displacementY);
+            // // trans = add(trans, displacementY);
             
-            mv = mult(mv, translate(t));//test
-            // mv = mult(mv, translate(displacementY));
+            // mv = mult(mv, translate(t));//test
+            // // mv = mult(mv, translate(displacementY));
             break;
           case 115:
           case 83:
             // s key
             console.log(String.fromCharCode(key));
-            trans = add(trans, scale(-1, displacementY));
-            // mv = mat4();
-            mv = mult(mv, translate(scale(-1, displacementY)));
+
+            var thetaRadian = theta * Math.PI / 180.0;
+            var tY = Math.cos(thetaRadian) * displacementY[1];//test
+            var tX = 1 * Math.sin(thetaRadian) * displacementY[1];//test
+
+            var t = [-tX, -tY, 0];// test
+
+            movePolygon(t);
+
             break;
           case 97:
           case 65:
@@ -134,7 +141,7 @@ window.onload = function init()
             // e key
 
             //home(); // sets trans2 to current position
-            theta = theta+ displacementR;
+            theta = theta + displacementR;
             var moveCentre = scale(-1,trans);
             var rotat = rotate(displacementR, [0,0,1]);
             var movePo = scale(-1, moveCentre);
@@ -192,15 +199,19 @@ function rotatep(angle, point){
     var thetaX = Math.acos()
 
 }
-function movePolygon(){
-    trans = trans2;
+function movePolygon(t){
+    trans = add(trans, t);
+    console.log(trans);
+    mv = mult(mv, translate(t));//test  
 
-    console.log(trans2);
+    // trans = trans2;
 
-    // trans = add(trans, [0, 0.01, 0]);
-    mv = mat4();
-    mv = mult(mv, translate(trans));
-    render();
+    // console.log(trans2);
+
+    // // trans = add(trans, [0, 0.01, 0]);
+    // mv = mat4();
+    // mv = mult(mv, translate(trans));
+    // render();
 }
 
 function home() {
@@ -214,9 +225,10 @@ function home() {
 
 function whereami(){
     console.log("Where am I?");
-    console.log(trans + " @ " + theta);
+    var where = trans + " @ " + theta;
+    console.log(where);
     console.log("**************");
-
+    document.getElementById("where").innerHTML = where;
 }
 function reset(){
     mv = mat4();
