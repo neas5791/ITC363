@@ -76,8 +76,8 @@ window.onload = function init()
 
 
 
-            var tX = -1* Math.sin(theta/2) * displacementY[1];//test
-            var tY = Math.cos(theta/2) * displacementY[1];//test
+            var tX = -1* Math.sin(theta) * displacementY[1];//test
+            var tY = Math.cos(theta) * displacementY[1];//test
 
             var t = [tX, tY, 0];// test
             
