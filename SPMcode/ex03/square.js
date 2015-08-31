@@ -68,26 +68,13 @@ window.onload = function init()
             // w key
             console.log(String.fromCharCode(key));
 
-            // float s = sin( theta );
-            // float c = cos( theta );
-
-            // gl_Position.x = -s * vPosition.y + c * vPosition.x;
-            // gl_Position.y =  s * vPosition.x + c * vPosition.y;
-
-
             var thetaRadian = theta * Math.PI / 180.0;
-            var tY = Math.cos(thetaRadian) * displacementY[1];//test
-            var tX = 1 * Math.sin(thetaRadian) * displacementY[1];//test
+            var tX = 1 * Math.sin(thetaRadian) * displacementY[1]; // x component of transfromation
+            var tY = Math.cos(thetaRadian) * displacementY[1]; // y component of transfromation
 
-            var t = [tX, tY, 0];// test
+            var t = [tX, tY, 0]; // transformation based on rotatation
             
             movePolygon(t);            
-            // trans = add(trans, t);
-
-            // // trans = add(trans, displacementY);
-            
-            // mv = mult(mv, translate(t));//test
-            // // mv = mult(mv, translate(displacementY));
             break;
           case 115:
           case 83:
@@ -95,29 +82,41 @@ window.onload = function init()
             console.log(String.fromCharCode(key));
 
             var thetaRadian = theta * Math.PI / 180.0;
-            var tY = Math.cos(thetaRadian) * displacementY[1];//test
-            var tX = 1 * Math.sin(thetaRadian) * displacementY[1];//test
+            var tX = 1 * Math.sin(thetaRadian) * displacementY[1]; // x component of transfromation
+            var tY = Math.cos(thetaRadian) * displacementY[1]; // y component of transfromation
+            
 
-            var t = [-tX, -tY, 0];// test
+            var t = [-tX, -tY, 0]; // transformation based on rotatation
 
             movePolygon(t);
-
             break;
           case 97:
           case 65:
             // a key
             console.log(String.fromCharCode(key));
-            trans = add(trans, scale(-1,displacementX));
-            // mv = mat4();
-            mv = mult(mv, translate(scale(-1,displacementX)));
+            
+            var thetaRadian = theta * Math.PI / 180.0;
+
+            var tX = Math.cos(thetaRadian) * displacementX[0]; // x component of transfromation
+            var tY = Math.sin(thetaRadian) * displacementX[0]; // y component of transfromation
+
+            var t = [-tX, tY, 0]; // transformation based on rotatation
+
+            movePolygon(t);
             break;
           case 100:
           case 68:
             // d key
             console.log(String.fromCharCode(key));
-            trans = add(trans, displacementX);
-            // mv = mat4();
-            mv = mult(mv, translate(displacementX));
+
+            var thetaRadian = theta * Math.PI / 180.0;
+
+            var tX = Math.cos(thetaRadian) * displacementX[0]; // x component of transfromation
+            var tY = Math.sin(thetaRadian) * displacementX[0]; // y component of transfromation
+
+            var t = [tX, -tY, 0]; // transformation based on rotatation
+
+            movePolygon(t);
             break;
           case 27:
             // escape key
@@ -127,48 +126,27 @@ window.onload = function init()
           case 113:
           case 81:
             // q key
-            // reset trans to [0,0,0]
             trans = add(trans, scale(-1, trans));
             // set mv to be the identity matrix
             mv = mat4(); // no modifictation to vertices information :)
             // 
-            //mv = mult(mv, translate(trans));
             console.log(String.fromCharCode(key));
             theta = 0;
             break;
           case 101:
           case 69:
             // e key
-
-            //home(); // sets trans2 to current position
+            console.log(String.fromCharCode(key));
             theta = theta + displacementR;
-            var moveCentre = scale(-1,trans);
+            var moveCentre = scale(-1, trans);
             var rotat = rotate(displacementR, [0,0,1]);
             var movePo = scale(-1, moveCentre);
 
-            mv = mult(mv,translate(moveCentre));
-            mv = mult(mv,rotat);
-            mv = mult(mv,translate(movePo));
+            // model the transfomrations
+            mv = mult(mv, translate(moveCentre));
+            mv = mult(mv, rotat);
+            mv = mult(mv, translate(movePo));
 
-            var bv = inverse
-/*          
-            var temp = trans;
-            mv =mat4();
-            trans = add(trans, scale(-1, trans));
-            // mv = mat4();
-            mv = mult(mv, translate(trans));
-
-            theta++;
-            console.log(theta)
-            var rot = rotate(theta, [0,0,15]);
-            console.log(rot);
-            mv = mult(mv, rot);
-
-            // mv = mat4();
-            mv = mult(mv, translate(temp));
-
-*/
-            // console.log(String.fromCharCode(key));
             break;
         }
 
@@ -201,7 +179,7 @@ function rotatep(angle, point){
 }
 function movePolygon(t){
     trans = add(trans, t);
-    console.log(trans);
+    // console.log(trans);
     mv = mult(mv, translate(t));//test  
 
     // trans = trans2;
@@ -223,12 +201,15 @@ function home() {
     render();   
 }
 
+var locDis = "";
+
 function whereami(){
     console.log("Where am I?");
     var where = trans + " @ " + theta;
     console.log(where);
     console.log("**************");
-    document.getElementById("where").innerHTML = where;
+    var locDis = locDis + "</br>" + where;
+    document.getElementById("where").innerHTML = where + "</br>" + locDis;
 }
 function reset(){
     mv = mat4();
