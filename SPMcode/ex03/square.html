@@ -8,17 +8,19 @@ uniform mat4 modelview;
 void
 main()
 {
+	gl_PointSize = 5.0;
     gl_Position = modelview * vPosition;
 }
 </script>
 
 <script id="fragment-shader" type="x-shader/x-fragment">
 precision mediump float;
+uniform vec4 fColour;
 
 void
 main()
 {
-    gl_FragColor = vec4( 0.0, 1.0, 1.0, 1.0 );
+    gl_FragColor = fColour;
 }
 </script>
 
