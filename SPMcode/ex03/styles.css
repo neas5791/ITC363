@@ -11,18 +11,27 @@
     float: left;
 }
 #vertexInfo{
+    width: 256px;
     float: left;
 }
+#home{
+    position: relative;
+}
+#whereami{
+ position: relative;   
+}
+
 
 button{
     height:20px; 
     width:100px; 
 
-    margin: -20px -50px; 
+
 
     position: relative;
-    top:50%;
-    /*left:50%;*/
+    /*top:50%;
+    /*margin: 0px -50px;
+    left:25%;*/
 }
 
 /*#resetButton {

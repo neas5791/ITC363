@@ -8,8 +8,8 @@ var trans       = [0.0,0.0,0.0]; // displacement of triangle's origin
 var mv; // the transformation matrix
 var theta = 0;
 var vertices;
-var displacementX = [ 0.01, 0, 0 ]; // the positive amount to move the object when translating in X direction
-var displacementY = [ 0, 0.01, 0 ]; // the positive amount to move the object when translating in Y direction
+var displacementX = [ 0.05, 0, 0 ]; // the positive amount to move the object when translating in X direction
+var displacementY = [ 0, 0.05, 0 ]; // the positive amount to move the object when translating in Y direction
 var displacementR = 5.0; // the positive amount to rotate the object about an axis
 var trans2;
 
@@ -126,6 +126,30 @@ window.onload = function init()
           case 113:
           case 81:
             // q key
+            console.log(String.fromCharCode(key));
+            theta = theta + displacementR;
+            var moveCentre = scale(-1, trans);
+            var rotat = rotate(displacementR, [0,0,1]);
+            var movePo = scale(-1, moveCentre);
+
+            // translate the object back to the original position
+            // on the canvas i.e. rotate about the single point on the canvas
+            var chordR = ( displacementR / 2 ) * Math.PI / 180.0;
+            var chord = 2 * Math.sin( chordR ) * trans[1];
+            var tX = Math.cos(chordR) * chord;
+            var tY = Math.sin(chordR) * chord;
+
+            var t = [tX, -tY, 0];
+
+            // var rotatA = rotate(-5, [0,0,-1]);
+            // model the transfomrations
+            mv = mult(mv, translate(moveCentre));
+            mv = mult(mv, rotat);
+            mv = mult(mv, translate(movePo));
+            mv = mult(mv, translate(t));
+            // mv = mult(mv, rotatA);
+
+            break;
             trans = add(trans, scale(-1, trans));
             // set mv to be the identity matrix
             mv = mat4(); // no modifictation to vertices information :)
@@ -137,19 +161,31 @@ window.onload = function init()
           case 69:
             // e key
             console.log(String.fromCharCode(key));
-            theta = theta + displacementR;
+            theta = theta - displacementR;
             var moveCentre = scale(-1, trans);
-            var rotat = rotate(displacementR, [0,0,1]);
+            var rotat = rotate(-1 * displacementR, [0,0,1]);
             var movePo = scale(-1, moveCentre);
 
+            // translate the object back to the original position
+            // on the canvas i.e. rotate about the single point on the canvas
+            var chordR = ( displacementR / 2 ) * Math.PI / 180.0;
+            var chord = 2 * Math.sin( chordR ) * trans[1];
+            var tX = Math.cos(chordR) * chord;
+            var tY = Math.sin(chordR) * chord;
+
+            var t = [-tX, -tY, 0];
+
+            // var rotatA = rotate(-5, [0,0,-1]);
             // model the transfomrations
             mv = mult(mv, translate(moveCentre));
             mv = mult(mv, rotat);
             mv = mult(mv, translate(movePo));
+            mv = mult(mv, translate(t));
+            // mv = mult(mv, rotatA);
 
             break;
         }
-
+        whereami();
         render();
     };
 
@@ -201,15 +237,27 @@ function home() {
     render();   
 }
 
-var locDis = "";
+
+var transList = [];
 
 function whereami(){
     console.log("Where am I?");
     var where = trans + " @ " + theta;
     console.log(where);
     console.log("**************");
-    var locDis = locDis + "</br>" + where;
-    document.getElementById("where").innerHTML = where + "</br>" + locDis;
+    transList.push(where);
+    
+    var locDis = "";
+
+    for (var i = 0; i < transList.length; i++ ) {
+        if (i % 20 == 0 )
+            locDis = "";
+        locDis = transList[i] + "</br>" + locDis;
+    }
+
+    // locDis = where + "</br>" + locDis;
+    // console.log(locDis);
+    document.getElementById("where").innerHTML = locDis;
 }
 function reset(){
     mv = mat4();
