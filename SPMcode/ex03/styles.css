@@ -11,7 +11,7 @@
     float: left;
 }
 #vertexInfo{
-    width: 256px;
+    width: 512px;
     float: left;
 }
 #home{
@@ -19,6 +19,12 @@
 }
 #whereami{
  position: relative;   
+}
+#butts{
+    float: left;
+}
+#otherbutts{
+    float: left;
 }
 
 

@@ -6,6 +6,7 @@ var colLoc; // fragment shader location
 var matLoc; // shader program location of modelview
 var trans       = [0.0,0.0,0.0]; // displacement of triangle's origin
 var mv; // the transformation matrix
+
 var theta = 0;
 var vertices;
 var displacementX = [ 0.05, 0, 0 ]; // the positive amount to move the object when translating in X direction
@@ -68,7 +69,7 @@ window.onload = function init()
             // w key
             console.log(String.fromCharCode(key));
 
-            var thetaRadian = theta * Math.PI / 180.0;
+            var thetaRadian = toRadians(theta); // * Math.PI / 180.0;
             var tX = 1 * Math.sin(thetaRadian) * displacementY[1]; // x component of transfromation
             var tY = Math.cos(thetaRadian) * displacementY[1]; // y component of transfromation
 
@@ -127,7 +128,7 @@ window.onload = function init()
           case 81:
             // q key
             console.log(String.fromCharCode(key));
-            theta = theta + displacementR;
+            setTheta(displacementR);
             var moveCentre = scale(-1, trans);
             var rotat = rotate(displacementR, [0,0,1]);
             var movePo = scale(-1, moveCentre);
@@ -149,31 +150,34 @@ window.onload = function init()
             mv = mult(mv, translate(t));
             // mv = mult(mv, rotatA);
 
-            break;
-            trans = add(trans, scale(-1, trans));
-            // set mv to be the identity matrix
-            mv = mat4(); // no modifictation to vertices information :)
-            // 
-            console.log(String.fromCharCode(key));
-            theta = 0;
+            // break;
+            // trans = add(trans, scale(-1, trans));
+            // // set mv to be the identity matrix
+            // mv = mat4(); // no modifictation to vertices information :)
+            // // 
+            // console.log(String.fromCharCode(key));
+            // theta = 0;
             break;
           case 101:
           case 69:
             // e key
             console.log(String.fromCharCode(key));
-            theta = theta - displacementR;
+            setTheta(-1* displacementR);
             var moveCentre = scale(-1, trans);
             var rotat = rotate(-1 * displacementR, [0,0,1]);
             var movePo = scale(-1, moveCentre);
 
             // translate the object back to the original position
             // on the canvas i.e. rotate about the single point on the canvas
-            var chordR = ( displacementR / 2 ) * Math.PI / 180.0;
-            var chord = 2 * Math.sin( chordR ) * trans[1];
+            var chordR = toRadians(displacementR / 2 );//( displacementR / 2 ) * Math.PI / 180.0;
+            var chord = 2 * Math.sin( toRadians( chordR ) ) * trans[1];
             var tX = Math.cos(chordR) * chord;
             var tY = Math.sin(chordR) * chord;
 
-            var t = [-tX, -tY, 0];
+            var t = [-tX, tY, 0];
+
+
+
 
             // var rotatA = rotate(-5, [0,0,-1]);
             // model the transfomrations
@@ -182,6 +186,15 @@ window.onload = function init()
             mv = mult(mv, translate(movePo));
             mv = mult(mv, translate(t));
             // mv = mult(mv, rotatA);
+
+
+            // float s = sin( theta );
+            // float c = cos( theta );
+
+            // gl_Position.x = -s * vPosition.y + c * vPosition.x;
+            // gl_Position.y =  s * vPosition.x + c * vPosition.y;
+
+
 
             break;
         }
@@ -203,15 +216,12 @@ function render() {
     gl.uniform4fv(colLoc, flatten(BLACK));
     gl.drawArrays (gl.POINTS, 2, 1);
 }
-
-
 // point is the vec3 vertices that represents the centre of the 
 function rotatep(angle, point){
     var R = mat4();
     var ctm = mat4();
 
     var thetaX = Math.acos()
-
 }
 function movePolygon(t){
     trans = add(trans, t);
@@ -227,17 +237,15 @@ function movePolygon(t){
     // mv = mult(mv, translate(trans));
     // render();
 }
-
 function home() {
     // reset state variables
     theta = 0;
     trans = [0,0,0]; // issue 
     mv = mat4();
-
+    transList = [];
+    document.getElementById("where").innerHTML = "";
     render();   
 }
-
-
 var transList = [];
 
 function whereami(){
@@ -255,12 +263,29 @@ function whereami(){
         locDis = transList[i] + "</br>" + locDis;
     }
 
-    // locDis = where + "</br>" + locDis;
-    // console.log(locDis);
     document.getElementById("where").innerHTML = locDis;
 }
 function reset(){
     mv = mat4();
     trans = [0,0,0];
     theta = 0;
+}
+function state(){
+    var t = "trans: "+ trans;
+    document.getElementById("where").innerHTML = t;
+}
+
+function setTheta(deltaTheta){
+    theta = theta + deltaTheta;
+    if (theta > 360)
+        theta -= 360;
+    else if (theta < 0)
+        theta += 360;
+}
+// returns theta in radians
+function getTheta(){
+    return theta * Math.PI / 180;
+}
+function toRadians(degrees){
+  return degrees * Math.PI / 180;  
 }

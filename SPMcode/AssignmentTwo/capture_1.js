@@ -12,11 +12,12 @@ var RED         = vec4(1.0, 0.0, 0.0, 1.0);
 var BLACK       = vec4(0.0, 0.0, 0.0, 1.0);
 var BLUE        = vec4(51.0/255.0,51.0/255.0, 1.0, 1.0);
 
+// vertex buffer
+var vBuffer;
 
 var rotation; // represents the winding direction of triangle
 var isIntersect; // represents whether lines intersect
 var edges       = []; // each element is a pair of vertices on triangle 
-var theta       = 0.0;
 
 var colLoc; // frag_shader variable for the colour
 var matLoc; // shader program location of modelview
@@ -24,6 +25,11 @@ var thetaLoc; // vertex_shader rotation variable
 var trans       = [0.0,0.0,0.0]; // displacement of triangle's origin
 var mv; // the transformation matrix
 
+var theta = 0.0;
+var displacementX = [ 0.05, 0, 0 ]; // the positive amount to move the object when translating in X direction
+var displacementY = [ 0, 0.05, 0 ]; // the positive amount to move the object when translating in Y direction
+var displacementR = 5.0; // the positive amount to rotate the object about an axis
+var transList = [];
 
 window.onload = function() {
     // console.log(String.fromCharCode(27));
@@ -44,7 +50,7 @@ window.onload = function() {
     gl.useProgram(program);
 
 
-    var vBuffer = gl.createBuffer();
+    vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
 
     gl.bufferData( gl.ARRAY_BUFFER, sizeof['vec3'] * maxVertices, gl.STATIC_DRAW );
@@ -67,7 +73,6 @@ window.onload = function() {
         clearCanvas(); // clear the screen and reset for the user to start again
 
         console.log("NumVertices is now " + vCount);
-
     };
 
     canvas.addEventListener("mousedown", function(event){
@@ -115,7 +120,10 @@ window.onload = function() {
         } 
         
         // if (index == vCount ) {
-        //     getCentre();
+        //     setCentre();
+        //     // // send the new vertices information to shader
+        //     // gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+        //     // gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW );
         // }
 
         // update the HTML UI display with count of how many vertices are selected
@@ -130,51 +138,119 @@ window.onload = function() {
           case 119:
           case 87:
             // w key
-            console.log(String.fromCharCode(key));
-            move([0,0.01,0]);
-            // trans = add(trans, [0, 0.01, 0]);
+            // console.log(String.fromCharCode(key));
+            
+            var thetaRadian = toRadians( theta );
+            // making adjustment for the rotation.
+            var tX = 1 * Math.sin(thetaRadian) * displacementY[1]; // x component of transfromation
+            var tY = Math.cos(thetaRadian) * displacementY[1]; // y component of transfromation
+
+            var t = [tX, tY, 0]; // transformation based on rotatation
+            
+            movePolygon(t);
             break;
           case 115:
           case 83:
             // s key
-            console.log(String.fromCharCode(key));
-            move([0,-0.01,0]);
-            // trans = add(trans, [0, -0.01, 0]);
+            // console.log(String.fromCharCode(key));
+
+            var thetaRadian = toRadians( theta );
+            // making adjustment for the rotation.
+            var tX = 1 * Math.sin(thetaRadian) * displacementY[1]; // x component of transfromation
+            var tY = Math.cos(thetaRadian) * displacementY[1]; // y component of transfromation
+            
+            var t = [-tX, -tY, 0]; // transformation based on rotatation
+
+            movePolygon(t);
             break;
           case 97:
           case 65:
             // a key
-            console.log(String.fromCharCode(key));
-            move([-0.01, 0, 0]);
-            // trans = add(trans, [-0.01, 0, 0]);
+            // console.log(String.fromCharCode(key));
+            
+            var thetaRadian = toRadians( theta );
+            // making adjustment for the rotation.
+            var tX = Math.cos(thetaRadian) * displacementX[0]; // x component of transfromation
+            var tY = Math.sin(thetaRadian) * displacementX[0]; // y component of transfromation
+
+            var t = [-tX, tY, 0]; // transformation based on rotatation
+
+            movePolygon(t);
             break;
           case 100:
           case 68:
             // d key
-            console.log(String.fromCharCode(key));
-            move([0.01, 0, 0]);
-            // trans = add(trans, [0.01, 0, 0]);
+            // console.log(String.fromCharCode(key));
+
+            var thetaRadian = toRadians( theta );
+            // making adjustment for the rotation.
+            var tX = Math.cos(thetaRadian) * displacementX[0]; // x component of transfromation
+            var tY = Math.sin(thetaRadian) * displacementX[0]; // y component of transfromation
+
+            var t = [tX, -tY, 0]; // transformation based on rotatation
+
+            movePolygon(t);
+            break;
+          case 113:
+          case 81:
+            // q key
+            // console.log(String.fromCharCode(key));
+            // move counter clockwise direction
+            setTheta(displacementR);
+            var moveCentre = scale(-1, trans);
+            var rotat = rotate(displacementR, [0,0,1]);
+            var movePo = scale(-1, moveCentre);
+
+            // translate the object back to the original position
+            // on the canvas i.e. rotate about the single point on the canvas
+            var chordR = ( displacementR / 2 ) * Math.PI / 180.0;
+            var chord = 2 * Math.sin( chordR ) * trans[1];
+            var tX = Math.cos(chordR) * chord;
+            var tY = Math.sin(chordR) * chord;
+
+            var t = [tX, -tY, 0];
+
+            // model the transfomrations
+            mv = mult(mv, translate(moveCentre));
+            mv = mult(mv, rotat);
+            mv = mult(mv, translate(movePo));
+            mv = mult(mv, translate(t));
+            break;
+          case 101:
+          case 69:
+            // e key
+            // console.log(String.fromCharCode(key));
+            // move clockwise direction
+            setTheta(-1 * displacementR);
+            var moveCentre = scale(-1, trans);
+            console.log(moveCentre);
+            var rotat = rotate(-1 * displacementR, [0,0,1]);
+            // var movePo = scale(-1, moveCentre);
+
+            // translate the object back to the original position
+            // on the canvas i.e. rotate about the single point on the canvas
+            var chordR = toRadians(displacementR / 2 );//( displacementR / 2 ) * Math.PI / 180.0;
+            var chord = 2 * Math.sin( toRadians( chordR ) ) * trans[1];
+            var tX = Math.cos(chordR) * chord;
+            var tY = Math.sin(chordR) * chord;
+
+            var t = [-tX, tY, 0];
+            
+            mv = mult(mv, translate(moveCentre));
+            mv = mult(mv, rotat);
+            // mv = mult(mv, translate(movePo));
+            // mv = mult(mv, translate(t));
+      
             break;
           case 27:
             // escape key
             console.log("Esc");
             clearCanvas();
             break;
-          case 113:
-          case 81:
-            // q key
-            console.log(String.fromCharCode(key));
-            break;
-          case 101:
-          case 69:
-            // e key
-            console.log(String.fromCharCode(key));
-            break;
         }
-
+        whereami();
         render();
-    };
-
+    };        
 
     render();
 }
@@ -210,6 +286,7 @@ function render(){
     }
 }
 
+// renders the object showing offending line segment.
 function error() {
     // console.log("Error on vertex " + index);
     // console.log("Please select another point");
@@ -307,28 +384,34 @@ function RHTwinding(vlist) {
 }
 
 // get the centre of the polygon by averaging the vertices entered
-function getCentre() {
+// resets vertices about the new point
+function setCentre() {
     centre = vec3();
     // Calculate model origin for triangle by averaging vertices
-    // trans = vec3();
     for (var i = 0; i < vCount; i++) {
         centre = add(centre, vertices[i]);
     }
     centre = scale(1/vCount, centre);
     // Reset vertices with respect to model origin
+    console.log(centre);
     for (i = 0; i < vCount; i++) {
         vertices[i] = subtract(vertices[i], centre);
     }
-
-    console.log(trans);
+    // send the new vertices information to shader
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW );
 }
 
 function reset(){
+    // reset the polygon data
     vertices = [];
     edges = [];
     index = 0;
+    // reset the transformation data
     trans = [0.0, 0.0, 0.0];
+    theta = 0;
     mv = mat4();
+
     setHtmlUi();
 }
 
@@ -345,6 +428,7 @@ function setHtmlUi() {
 }
 
 function centrePolygon(){
+    showArray(vertices);
     var centre = vec3();
     for (var i = 0; i < vCount; i++) {
         centre = add(centre, vertices[i]);
@@ -353,6 +437,7 @@ function centrePolygon(){
     for (i = 0; i < vCount; i++) {
         vertices[i] = subtract(vertices[i], centre);
     }
+    showArray(vertices);
     console.log(centre);
 
     mv = mult(mv, translate(centre));
@@ -361,13 +446,45 @@ function centrePolygon(){
 
     render();
 }
+function home() {
+    // reset state variables
+    theta = 0;
+    trans = [0,0,0]; // issue 
+    mv = mat4();
+    transList = [];
 
-function move(translation){
-    console.log(trans);
-    trans = add(trans, translation);
-    console.log(trans);
+    var a = confirm("This will translate the polygon to [0,0,0]?\nThis can not be undone!");
+    if (a){
+        setCentre();
+    }
+
+    // document.getElementById("where").innerHTML = "";
+    render();   
+}
+
+// function move(translation){
+//     console.log(trans);
+//     trans = add(trans, translation);
+//     console.log(trans);
     
-    mv = mult(mv, translate(trans));
+//     mv = mult(mv, translate(trans));
+// }
+
+/* ************************************** */
+// below functions are for object movment //
+function movePolygon(t){
+    trans = add(trans, t);
+    mv = mult(mv, translate(t));
+}
+function toRadians(degrees){
+  return degrees * Math.PI / 180;  
+}
+function setTheta(deltaTheta){
+    theta = theta + deltaTheta;
+    if (theta > 360)
+        theta -= 360;
+    else if (theta < 0)
+        theta += 360;
 }
 
 /* *** UTILITY FUNCTIONS BELOW *** */
@@ -400,4 +517,21 @@ function build_list_of_lines(){
             count++;
         }while (count != edges.length);
     }
+}
+function whereami(){
+    console.log("Where am I?");
+    var where = trans + " @ " + theta;
+    console.log(where);
+    console.log("**************");
+    transList.push(where);
+    
+    var locDis = "";
+
+    for (var i = 0; i < transList.length; i++ ) {
+        if (i % 20 == 0 )
+            locDis = "";
+        locDis = transList[i] + "</br>" + locDis;
+    }
+
+    // document.getElementById("where").innerHTML = locDis;
 }
