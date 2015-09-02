@@ -23,6 +23,7 @@ var colLoc; // frag_shader variable for the colour
 var matLoc; // shader program location of modelview
 var thetaLoc; // vertex_shader rotation variable
 var trans       = [0.0,0.0,0.0]; // displacement of triangle's origin
+var origin; // the centre of the polygon (determined by averaging the vertices)
 var mv; // the transformation matrix
 
 var theta = 0.0;
@@ -196,6 +197,11 @@ window.onload = function() {
             // q key
             // console.log(String.fromCharCode(key));
             // move counter clockwise direction
+
+            rotatePolygon(false);
+            /* 
+
+
             setTheta(displacementR);
             var moveCentre = scale(-1, trans);
             var rotat = rotate(displacementR, [0,0,1]);
@@ -215,32 +221,52 @@ window.onload = function() {
             mv = mult(mv, rotat);
             mv = mult(mv, translate(movePo));
             mv = mult(mv, translate(t));
+
+            */
             break;
           case 101:
           case 69:
             // e key
             // console.log(String.fromCharCode(key));
             // move clockwise direction
+
+            
+            // movePolygon(scale(-1, trans));
+            rotatePolygon(true);
+            // movePolygon(p0);
+
+            /*
+            
             setTheta(-1 * displacementR);
+            // console.log(theta);
+            // console.log("trans = "+ trans);
             var moveCentre = scale(-1, trans);
-            console.log(moveCentre);
+            // console.log("movecentre = "+ moveCentre);
             var rotat = rotate(-1 * displacementR, [0,0,1]);
+            // console.log("rotat = "+ rotat);
             // var movePo = scale(-1, moveCentre);
 
-            // translate the object back to the original position
-            // on the canvas i.e. rotate about the single point on the canvas
-            var chordR = toRadians(displacementR / 2 );//( displacementR / 2 ) * Math.PI / 180.0;
-            var chord = 2 * Math.sin( toRadians( chordR ) ) * trans[1];
-            var tX = Math.cos(chordR) * chord;
-            var tY = Math.sin(chordR) * chord;
 
-            var t = [-tX, tY, 0];
+
+            // // translate the object back to the original position
+            // // on the canvas i.e. rotate about the single point on the canvas
+            // var chordR = toRadians(displacementR / 2 );//( displacementR / 2 ) * Math.PI / 180.0;
+            // var chord = 2 * Math.sin( toRadians( chordR ) ) * trans[1];
+            // var tX = Math.cos(chordR) * chord;
+            // var tY = Math.sin(chordR) * chord;
+
+            // var t = [-tX, tY, 0];
             
             mv = mult(mv, translate(moveCentre));
+            // movePolygon(moveCentre);
+            console.log(mv);
             mv = mult(mv, rotat);
             // mv = mult(mv, translate(movePo));
+            movePolygon(trans);
             // mv = mult(mv, translate(t));
-      
+            
+
+            */
             break;
           case 27:
             // escape key
@@ -260,7 +286,7 @@ function render(){
     // cleans the screen paints canvas 
     gl.clear( gl.COLOR_BUFFER_BIT );
 
-    console.log(trans);
+    // console.log(trans);
 
     // mv = translate(trans);
     gl.uniformMatrix4fv(matLoc, false, flatten(mv));
@@ -476,6 +502,23 @@ function movePolygon(t){
     trans = add(trans, t);
     mv = mult(mv, translate(t));
 }
+// direction 
+// -1 is clockwise
+// 1 is anticlockwise
+function rotatePolygon(clockwise){
+    var rotat;
+    if (clockwise) {
+        setTheta(-1 * displacementR);
+        rotat = rotate(-1 * displacementR, [0,0,1]);    
+    } 
+    else {
+        setTheta(displacementR);
+        rotat = rotate(displacementR, [0,0,1]);    
+    }
+
+    mv = mult(mv, rotat);
+}
+
 function toRadians(degrees){
   return degrees * Math.PI / 180;  
 }
@@ -533,5 +576,6 @@ function whereami(){
         locDis = transList[i] + "</br>" + locDis;
     }
 
-    // document.getElementById("where").innerHTML = locDis;
+    document.getElementById("where").innerHTML = locDis;
 }
+

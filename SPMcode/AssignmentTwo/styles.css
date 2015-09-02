@@ -1,28 +1,57 @@
+#slider{
 
-#footer {
+}
+#gui{
+    width: 100%;
+    height: 512px;
+}
+#canvas{
+    float: left;
+    position: relative;
+    width:512px;
+    height: 512px
+}
+#vertexInfo{
     width: 512px;
-    height: 50px;
+    height: 512px;
+    float: left;
+    position: relative;
+    background-color: #b3b3b3;
+    /*margin: auto;*/
+    border:1px solid black;
+}
+#footer {
+    width: 1024px;
+    height: 150px;
     background-color: #ffcc33;
     /*margin: auto;*/
     border:1px solid black;
 }
-#resetButton {
-    width: 33%;
-    float: left;
-    height: 30px;
+#buttons{
+    width: 400px;
+    /*float: left;*/
+}
+
+#reset {
+   /* float: left;*/
+    /*height: 50px;*/
     
 }
-#listButton {
-    width: 33%;
-    height: 50px;
-    float: left;
-    height: 30px;
+#home {
+    /*height: 50px;
+    float: left;*/
+    /*height: 30px;*/
+}
+#whereami{
+    /*height: 50px;*/
+
 }
 #counter
 {
     width: 33%;
     height: 50px;
-    float:left;
+    position: relative;
+    float:right;
     height: 30px;
 }
 
@@ -30,11 +59,11 @@ button{
     height:20px; 
     width:100px; 
 
-    margin: -20px -50px; 
+    /*margin: -20px -50px; */
 
     position: relative;
-    top:50%;
-    left:50%;
+/*    top:50%;
+    left:25%;*/
 }
 /*
 #clear {
