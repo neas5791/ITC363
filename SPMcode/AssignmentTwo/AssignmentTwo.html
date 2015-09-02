@@ -39,7 +39,7 @@
 <script type="text/javascript" src="../Common/webgl-utils.js"></script>
 <script type="text/javascript" src="../Common/initShaders.js"></script>
 <script type="text/javascript" src="../Common/MV.js"></script>
-<script type="text/javascript" src="capture_1.js"></script>
+<script type="text/javascript" src="asg2.js"></script>
 </head>
 
 <body>
@@ -56,7 +56,12 @@
       </canvas>
     </div><!-- END CANVAS -->
     <div id="vertexInfo"><!-- VERTEX -->
-      <h5 id="where"></h5>
+      <div id="counter">
+        <p id="count">number of vertices</p>
+      </div>
+      <div id="information">
+        <h5 id="where"> </h5>
+      </div>
     </div><!-- END VERTEX -->
   </div><!-- END GUI WINDOW -->
 
@@ -75,10 +80,10 @@
           <button onclick="whereami()">whereAmI</button>
       </div>
     </div>
-    
+    <!--
     <div id="counter">
       <p id="count">number of vertices</p>
-    </div>
+    </div> -->
   </div><!-- END FOOTER CONTROLS -->
 </div><!-- END MAIN FRAME -->
 </body>
