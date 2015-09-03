@@ -510,7 +510,7 @@ function whereami(){
     var locDis = "";
 
     for (var i = 0; i < transList.length; i++ ) {
-        if (i % 20 == 0 )
+        if (i % 29 == 0 )
             locDis = "";
         locDis = transList[i] + "</br>" + locDis;
     }
