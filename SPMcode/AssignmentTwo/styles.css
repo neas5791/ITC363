@@ -34,19 +34,22 @@
     width: 512px;
     position: relative;
     padding-left: 10px;
-    padding-top: 10px;
+    padding-top: 20px;
 }
 #footer {
     width: 1024px;
-    height: 150px;
+    height: 300px;
     background-color: #ffcc33;
     overflow: hidden;
     border:1px solid black;
 }
 #buttons{
     width: 400px;
+    float: right;
 }
-
+#navigation{
+    float: left;
+}
 #reset {
 }
 #home {
@@ -56,6 +59,30 @@
 
 }
 
+#acw{
+    width: 60px;
+    height: 60px;
+    float: left;
+}
+#up{
+    width: 60px;
+    height: 60px;    
+    float: left;
+}
+#cw{
+    width: 60px;
+    height: 60px;    
+    float: left;
+}
+#nav, #nav1, #nav2 {
+    width: 180px;
+    height: 60px;
+}
+.nav{
+    width: 60px;
+    height: 60px;    
+    float: left;    
+}
 
 button{
     height:20px; 
