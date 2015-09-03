@@ -44,6 +44,12 @@
 
 <body>
 <div><!-- MAIN FRAME -->
+  
+  <div id="slider"><!-- SLIDER BAR -->
+    <p>Move the slider to select the number of vertices the polygon will have.</p>
+    <!-- <h4>Select number of vertices <br>--><h4> 3 <input id="slider" type="range" min="3" max="10" step="1" value="5" />
+      10</h4>
+  </div><!-- END SLIDER BAR -->
 
   <div id="gui"><!-- GUI WINDOW -->
     <div id="canvas"><!-- CANVAS -->
@@ -53,21 +59,30 @@
       <p id="count1">number of vertices</p>
     </div><!-- END CANVAS -->
     <div id="vertexInfo"><!-- VERTEX -->
-        
-    <div id="instructions">
-      <p>Move the slider to select the number of vertices your polygon will have.</br>
-        To construct the polygon click in the canvas area to the left; the selected points will form the vertices
-        of the polygon. While selecting the vertices the lines representing the edges will be drawn, if the edge 
-        breaches either condition of winding or intersection the line will be drawn in <a id="red">RED</a> colour 
-        and an error message will be displayed. When vertex selection is complete the polygon will render in a 
-        solid <a id="blue">BLUE</a>.
-        The below controls buttons or coresponding keyboard short keys (shown in brackets) will translate the 
-        complete polygon up(w), down(s), left(a) and right(d). The polygon can also be rotated about it's centre 
-        using the relative rotation buttons or the (q) and (e) keys. The target button in the centre of the navigation controls translates the polygon to the canvas [0,0] position.
-      </p>
+      <div id="counter">
+        <p id="count">number of vertices</p>
+      </div>
+      <div id="information">
+        <h5 id="where"> </h5>
+      </div>
+    </div><!-- END VERTEX -->
+  </div><!-- END GUI WINDOW -->
+
+
+  <div id="footer"><!--  FOOTER CONTROLS -->
+    <div id="buttons">
+      <div id="reset">
+        <button id="reset" onclick="clearCanvas()">Reset</button>
+      </div>
+
+      <div id="home">
+        <button onclick="home()">Centre</button>
+      </div>
+
+      <div id="whereami"> 
+          <button onclick="whereami()">whereAmI</button>
+      </div>
     </div>
-    <!-- <h4>Select number of vertices <br>-->
-  
     <div id="navigation">
       <div id="nav1">
         <div class="nav">
@@ -113,26 +128,10 @@
           <img src="img/gap.png" style="width:59px;height:59px;"></div>
       </div>
     </div>
-
-    <div id="slider"><!-- SLIDER BAR -->
-      <h4>min <input id="vertex-slider" type="range" min="3" max="10" step="1" value="5" /> max</h4>
-    </div><!-- END SLIDER BAR -->
-
-    
-    </div><!-- END VERTEX -->
-  </div><!-- END GUI WINDOW -->
-
-
-  <div id="footer"><!--  FOOTER CONTROLS -->
-    
+    <!--
     <div id="counter">
       <p id="count">number of vertices</p>
-    </div>
-
-    <div id="information">
-      <h5 id="where"> </h5>
-    </div>
-
+    </div> -->
   </div><!-- END FOOTER CONTROLS -->
 
 </div><!-- END MAIN FRAME -->

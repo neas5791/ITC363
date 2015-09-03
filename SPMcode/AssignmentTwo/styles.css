@@ -1,27 +1,54 @@
-#slider{
-
-}
-#gui{
+#gui {
     width: 1024px;
     height: 512px;
     border: 1px solid black;
 }
-#canvas{
+#canvas {
     float: left;
     position: relative;
     width:512px;
     height: 512px;
     overflow: hidden;
 }
-#vertexInfo{
+#vertexInfo {
     width: 512px;
     height: 512px;
     float: left;
     position: relative;
     background-color: #7d7d7d;
 }
-#counter
-{
+#instructions {
+    padding-left: 10px;
+}
+
+#slider {
+    float: bottom;
+    padding-left: 100px;
+}
+/*#min {
+    width: 25px;
+    float: left;
+    text-align: center;
+    vertical-align: middle;
+}
+#vertex-slider {
+    width: 412px;
+    float: left;
+    vertical-align: middle;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 50px;  height of thumbs (if not required set to 0) 
+    height: auto; // optionally add !important for WP version
+    width: auto;
+}
+#max {
+    width: 25px;
+    float: left;
+    text-align: center;
+}*/
+#counter {
     width: 512px;
     height: 50px;
     padding-left: 10px;
@@ -30,7 +57,7 @@
     float: left;
     height: 30px;
 }
-#information{
+#information {
     width: 512px;
     position: relative;
     padding-left: 10px;
@@ -38,16 +65,19 @@
 }
 #footer {
     width: 1024px;
-    height: 300px;
+    height: 150px;
     background-color: #ffcc33;
     overflow: hidden;
     border:1px solid black;
 }
-#buttons{
+#buttons {
     width: 400px;
     float: right;
 }
-#navigation{
+#navigation {
+    /*vertical-align: middle;*/
+    padding-left: 106px;
+    width: 512px;
     float: left;
 }
 #reset {
@@ -59,21 +89,21 @@
 
 }
 
-#acw{
+/*#acw {
     width: 60px;
     height: 60px;
     float: left;
 }
-#up{
+#up {
     width: 60px;
     height: 60px;    
     float: left;
 }
-#cw{
+#cw {
     width: 60px;
     height: 60px;    
     float: left;
-}
+}*/
 #nav, #nav1, #nav2 {
     width: 300px;
     height: 60px;
@@ -88,4 +118,12 @@ button{
     height:20px; 
     width:100px; 
     position: relative;
+}
+#red {
+    color: red;
+    background-color: white;
+}
+#blue {
+    color: #3333ff;
+    background-color: white;
 }
