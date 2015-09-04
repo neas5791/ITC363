@@ -79,10 +79,7 @@ window.onload = function() {
     };
 
     canvas.addEventListener("mousedown", function(event){
-        // if (index > vCount){
-        //     console.log("Polygon is finished");
-        //     return;
-        // }
+
         // Allow for canvas bounding box and record vertex
         var rect = canvas.getBoundingClientRect();
 
@@ -144,58 +141,10 @@ window.onload = function() {
     });
     
     window.onkeydown = function( event ) {
-        var key = event.keyCode;
-        switch( key ) {
-          case 119:
-          case 87:
-            // w key
-            // translate in a positive direction along Y axis of window
-            vertical(true);
-            break;
-          case 115:
-          case 83:
-            // s key
-            // translate in a negative direction along Y axis of window
-            vertical(false);
-
-            break;
-          case 97:
-          case 65:
-            // a key
-            // translate in a negative direction along X axis of window
-            horizontal(true);
-            
-            break;
-          case 100:
-          case 68:
-            // d key
-            // translate in a positive direction along X axis of window
-            horizontal(false);
-            
-            break;
-          case 113:
-          case 81:
-            // q key
-            // move counter clockwise direction
-
-            turn(false);
-
-            break;
-          case 101:
-          case 69:
-            // e key
-            // move clockwise direction
-
-            turn(true);
-
-            break;
-          case 27:
-            // escape key
-            console.log("Esc");
-            clearCanvas();
-            break;
-        }
-    };        
+        // refactored out to function
+        // making the onload function more readable
+        keyboardEvent(event);
+    };
 
     render();
 }
@@ -395,7 +344,68 @@ function home() {
 
     render();   
 }
+function keyboardEvent(event){
+    var key = event.keyCode;
+    
+    switch( key ) {
+      case 119:
+      case 87:
+        // w key
+        // translate in a positive direction along Y axis of window
+        vertical(true);
+        break;
+      case 115:
+      case 83:
+        // s key
+        // translate in a negative direction along Y axis of window
+        vertical(false);
 
+        break;
+      case 97:
+      case 65:
+        // a key
+        // translate in a negative direction along X axis of window
+        horizontal(true);
+
+        break;
+      case 100:
+      case 68:
+        // d key
+        // translate in a positive direction along X axis of window
+        horizontal(false);
+
+        break;
+      case 113:
+      case 81:
+        // q key
+        // move counter clockwise direction
+
+        turn(false);
+
+        break;
+      case 101:
+      case 69:
+        // e key
+        // move clockwise direction
+
+        turn(true);
+
+        break;
+      case 120:
+      case 88:
+        // x key
+        // translate polygon centre to window [0,0]
+
+        home();
+
+        break;
+      case 27:
+        // escape key
+        console.log("Esc");
+        clearCanvas();
+        break;
+    };
+}
 
 /* ************************************** */
 // below functions are for object movment //
