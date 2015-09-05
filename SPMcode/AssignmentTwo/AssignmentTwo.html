@@ -106,24 +106,27 @@
             <img src="img/gap.png" style="width:59px;height:59px;"></div>
         </div>
       </div><!-- END NAVIGATION -->
-
-      <div id="slider"><!-- SLIDER BAR -->
-        <h4>min 
-          <input id="vertex-slider" type="range" min="3" max="10" step="1" value="5"/>
-           max</h4>
-      </div><!-- END SLIDER BAR -->
-    
+      <div>
+        <div id="slider"><!-- SLIDER BAR -->
+          <h4>min 
+            <input id="vertex-slider" type="range" min="3" max="10" step="1" value="5"/>
+             max</h4>
+        </div><!-- END SLIDER BAR -->
+        <div id="reset">
+          <button id="reset" onclick="clearCanvas()">Reset</button>
+        </div>
+      </div>
     </div><!-- END VERTEX -->
   
   </div><!-- END GUI WINDOW -->
 
 
   <div id="footer"><!--  FOOTER CONTROLS -->
-    
-    <div id="counter"> <!-- COUNTER -->
-      <h2 id="count">number of vertices</h2>
-    </div><!-- END COUNTER -->
-
+    <div>
+      <div id="counter"> <!-- COUNTER -->
+        <h2 id="count">number of vertices</h2>
+      </div><!-- END COUNTER -->
+  </div>
     <div id="information"><!-- INFORMATION -->
       <h5 id="where"> </h5>
     </div><!-- END INFORMATION -->
