@@ -197,6 +197,7 @@ function drawLoop(){
         }
     }
 }
+
 // renders the object showing offending line segment.
 function error() {
     // cleans the screen paints canvas 
@@ -213,6 +214,10 @@ function error() {
     gl.drawArrays(gl.LINE_STRIP, index - 1, 2);
     console.log("error now draw the bad stuff");
 }
+
+/* ******************************************************* */
+// ****** below functions are for vertices testing ******* //
+/* ******************************************************* */
 
 // Checks the winding direction of a set of vetices and compares the result with last 
 // winding result which is stored in the rotation variable.
