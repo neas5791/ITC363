@@ -20,35 +20,11 @@
 #instructions {
     padding-left: 10px;
 }
-
 #slider {
-    float: bottom;
-    padding-left: 100px;
-    vertical-align: bottom;
-}
-/*#min {
-    width: 25px;
-    float: left;
-    text-align: center;
-    vertical-align: middle;
-}
-#vertex-slider {
-    width: 412px;
-    float: left;
-    vertical-align: middle;
     position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 50px;  height of thumbs (if not required set to 0) 
-    height: auto; // optionally add !important for WP version
-    width: auto;
+    bottom: 0px;
+    padding-left: 10px;
 }
-#max {
-    width: 25px;
-    float: left;
-    text-align: center;
-}*/
 #counter {
     width: 512px;
     height: 50px;
@@ -77,49 +53,22 @@
     float: right;
 }
 #navigation {
-    /*vertical-align: middle;*/
     padding-left: 106px;
     width: 512px;
     float: left;
 }
-#reset {
-}
-#home {
-}
-#whereami{
+#whereami {
     text-align: left;
 
 }
-
-/*#acw {
-    width: 60px;
-    height: 60px;
-    float: left;
-}
-#up {
-    width: 60px;
-    height: 60px;    
-    float: left;
-}
-#cw {
-    width: 60px;
-    height: 60px;    
-    float: left;
-}*/
 #nav, #nav1, #nav2 {
     width: 300px;
     height: 60px;
 }
-.nav{
+.nav {
     width: 60px;
     height: 60px;    
     float: left;    
-}
-
-button{
-    height:20px; 
-    width:100px; 
-    position: relative;
 }
 #red {
     color: red;
@@ -128,4 +77,9 @@ button{
 #blue {
     color: #3333ff;
     background-color: white;
+}
+button {
+    height:20px; 
+    width:100px; 
+    position: relative;
 }

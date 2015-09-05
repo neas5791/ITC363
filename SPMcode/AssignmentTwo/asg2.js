@@ -32,7 +32,7 @@ var theta = 0.0;
 var displacementX = [ 0.05, 0, 0 ]; // the positive amount to move the object when translating in X direction
 var displacementY = [ 0, 0.05, 0 ]; // the positive amount to move the object when translating in Y direction
 var displacementR = 5.0; // the positive amount to rotate the object about an axis
-var transList = [];
+var transList = []; // an array of 
 
 window.onload = function() {
     // console.log(String.fromCharCode(27));
@@ -149,6 +149,7 @@ window.onload = function() {
     render();
 }
 
+// renders the object
 function render(){
     // cleans the screen paints canvas 
     gl.clear( gl.COLOR_BUFFER_BIT );
@@ -297,6 +298,7 @@ function setCentre() {
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
     gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW );
 }
+
 // reset the state machine ready to sart again
 function reset(){
     // I had to add the following two lines to fix a random bug
@@ -320,6 +322,7 @@ function reset(){
     // reset the vertex counter
     setHtmlUi();
 }
+
 // clear the canvas 
 function clearCanvas() {
     // call to reset state information
@@ -329,21 +332,25 @@ function clearCanvas() {
 
     console.log("clearCanvas called");
 }
+
 // updates the html element with count of how many vertices are currently selected
 function setHtmlUi() {
     // sets the count element
-    document.getElementById("count").innerHTML = index + " of " + vCount + " selected";
+    document.getElementById("count").innerHTML = index + " of " + vCount + " Vertices selected";
 }
+
 // moves th model to the canvas frame 0,0,0 position
 function home() {
     // reset state variables
     theta = 0;
     trans = [0,0,0]; // issue 
     mv = mat4();
-    transList = [];
-
+    // transList = [];
+    whereami();
     render();   
 }
+
+// function provides the what to do on keyboard event
 function keyboardEvent(event){
     var key = event.keyCode;
     
@@ -407,8 +414,12 @@ function keyboardEvent(event){
     };
 }
 
-/* ************************************** */
-// below functions are for object movment //
+/* ******************************************************* */
+// below functions are for object translation and rotation //
+/* ******************************************************* */
+
+// translates the object by the vec3 t argument
+// updates the global trans variable.
 function movePolygon(t){
     trans = add(trans, t);
     mv = mult(mv, translate(t));
@@ -549,7 +560,9 @@ function whereami(){
     //document.getElementById("where").innerHTML = locDis;
     setHtmlDetails(locDis);
 }
+// update the HTML element with the text argument
 function setHtmlDetails(text){
+
     document.getElementById("where").innerHTML = text;
 }
 

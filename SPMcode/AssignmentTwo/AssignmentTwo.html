@@ -7,19 +7,12 @@
 
 <script id="vertex-shader" type="x-shader/x-vertex">
 
-  attribute vec4 vPosition;  
-  uniform mat4 modelview;
-  // uniform float theta;
+  attribute vec4 vPosition;  // the vertex position
+  uniform mat4 modelview; // the transformation to be applied to the vertex
 
   void
   main() {
-
-    // float s = sin( theta );
-    // float c = cos( theta );
-
-    // gl_Position.x = -s * vPosition.x + c * vPosition.x;
-    // gl_Position.y = s * vPosition.x + c * vPosition.y;
-    gl_Position = modelview * vPosition ;
+    gl_Position = modelview * vPosition ; // renders the vertex and transform
   }
 
 </script>
@@ -27,11 +20,10 @@
 <script id="fragment-shader" type="x-shader/x-fragment">
 
   precision mediump float;
-  uniform vec4 fColour;
+  uniform vec4 fColour; // colour being sent in from the js file
 
   void main() {
-    //the below changes the colour of the displayed vertices
-    gl_FragColor = fColour;
+    gl_FragColor = fColour; // set the colour to the value sent in from the js file
   }
   
 </script>
@@ -46,92 +38,95 @@
 <div><!-- MAIN FRAME -->
 
   <div id="gui"><!-- GUI WINDOW -->
+
     <div id="canvas"><!-- CANVAS -->
       <canvas id="gl-canvas" width="512" height="512">
       Oops ... your browser doesn't support the HTML5 canvas element
       </canvas>
       <p id="count1">number of vertices</p>
     </div><!-- END CANVAS -->
-    <div id="vertexInfo"><!-- VERTEX -->
+    
+    <div id="vertexInfo"> <!-- VERTEX -->
         
-    <div id="instructions">
-      <p>
-        <h4> Construction of Polygon</h4>
-        Move the slider below to change the number of vertices your polygon will have.</br>
-        To construct the polygon simply click in the canvas area to the left; the selected points will form the vertices of the polygon. During this selection process the lines representing the edges formed by the vertices will be drawn, if the edge breaches either condition of winding or intersection the line will be drawn in <a id="red">RED</a> colour. If a <a id="red">RED</a> line appears an appropriate  error message will be displayed.
-        At the cpmletion of vertex selection the polygon will render in a solid <a id="blue">BLUE</a> colour.
-        <h4> Navigation and Manipultaion </h4>
-        The below controls buttons or coresponding keyboard short keys (shown in brackets) will translate the 
-        complete polygon up(w), down(s), left(a) and right(d). The polygon can also be rotated about it's centre 
-        using the relative rotation buttons or the (q) and (e) keys. The target button in the centre of the navigation controls translates the polygon to the canvas [0,0] position.
-      </p>
-    </div>
-    <!-- <h4>Select number of vertices <br>-->
-  
-    <div id="navigation">
-      <div id="nav1">
-        <div class="nav">
-          <img src="img/anticlockwise.png" onmouseover="this.src='img/anticlockwise_d.png'" 
-                onmouseout="this.src='img/anticlockwise.png'" 
-                onclick="turn(false)" style="width:59px;height:59px;"></div>
-        <div class="nav">
-          <img src="img/gap.png" style="width:59px;height:59px;"></div>
-        <div class="nav">
-          <img src="img/up.png" onmouseover="this.src='img/up_d.png'" 
-                onmouseout="this.src='img/up.png'" onclick="vertical(true)" 
-                style="width:59px;height:59px;"></div>
-        <div class="nav"><img src="img/gap.png" style="width:59px;height:59px;"></div>
-        <div class="nav"> 
-          <img src="img/clockwise.png" onmouseover="this.src='img/clockwise_d.png'" 
-                onmouseout="this.src='img/clockwise.png'" onclick="turn(true)"
-                style="width:59px;height:59px;"></div>
-      </div>
-      <div id="nav2">
-        <div class="nav"><img src="img/gap.png" style="width:59px;height:59px;"></div>
-        <div class="nav">
-          <img src="img/left.png" onmouseover="this.src='img/left_d.png'" onmouseout="this.src='img/left.png'" 
-                onclick="horizontal(true)" style="width:59px;height:59px;"></div>
-        <div class="nav">
-          <img src="img/centre.png" onmouseover="this.src='img/centre_d.png'" 
-                onmouseout="this.src='img/centre.png'" 
-                onclick="home()" style="width:59px;height:59px;"></div>
-        <div class="nav">
-          <img src="img/right.png" onmouseover="this.src='img/right_d.png'" onmouseout="this.src='img/right.png'" 
-                onclick="horizontal(false)" style="width:59px;height:59px;"></div>
-      </div>
-      <div id="nav3">
-        <div class="nav">
-          <img src="img/gap.png" style="width:59px;height:59px;"></div>
-        <div class="nav">
-          <img src="img/gap.png" style="width:59px;height:59px;"></div>
-        <div class="nav">
-          <img src="img/down.png" onmouseover="this.src='img/down_d.png'" onmouseout="this.src='img/down.png'"
-                onclick="vertical(false)" style="width:59px;height:59px;"></div>
-        <div class="nav">
-          <img src="img/gap.png" style="width:59px;height:59px;"></div>
-        <div class="nav">
-          <img src="img/gap.png" style="width:59px;height:59px;"></div>
-      </div>
-    </div>
+      <div id="instructions"> <!-- INSTRUCTIONS -->
+        <p>
+          <h4> Construction of Polygon</h4>
+          Move the slider at the bottom of this frame to change the number of vertices your polygon will have.
+          To construct the polygon simply click in the canvas area to the left; the selected points will form the vertices of the polygon. During this selection process the lines representing the edges formed by the vertices will be drawn, if the edge breaches either condition of winding or intersection the line will be drawn in <a id="red">RED</a> colour. If a <a id="red">RED</a> line appears an appropriate  error message will be displayed.
+          At the completion of vertex selection the polygon will render in a solid <a id="blue">BLUE</a> colour.The polygon construction process can be started again at anytime by pressing the escape (esc) key or changing the number of vertices.
+          <h4> Navigation and Manipultaion </h4>
+          The below controls buttons (keyboard short keys shown in brackets) will translate the 
+          complete polygon relative to the viewing window up(w), down(s), left(a) and right(d). The polygon can also be rotated about it's centre 
+          using the relative rotation buttons or the (q) and (e) keys. The target button (x) in the centre of the navigation controls translates the polygon to the canvas [0,0] position.
+        </p>
+      </div> <!-- END INSTRUCTIONS -->
+    
+      <div id="navigation"><!-- NAVIGATION -->
+        <div id="nav1">
+          <div class="nav">
+            <img src="img/anticlockwise.png" onmouseover="this.src='img/anticlockwise_d.png'" 
+                  onmouseout="this.src='img/anticlockwise.png'" 
+                  onclick="turn(false)" style="width:59px;height:59px;"></div>
+          <div class="nav">
+            <img src="img/gap.png" style="width:59px;height:59px;"></div>
+          <div class="nav">
+            <img src="img/up.png" onmouseover="this.src='img/up_d.png'" 
+                  onmouseout="this.src='img/up.png'" onclick="vertical(true)" 
+                  style="width:59px;height:59px;"></div>
+          <div class="nav"><img src="img/gap.png" style="width:59px;height:59px;"></div>
+          <div class="nav"> 
+            <img src="img/clockwise.png" onmouseover="this.src='img/clockwise_d.png'" 
+                  onmouseout="this.src='img/clockwise.png'" onclick="turn(true)"
+                  style="width:59px;height:59px;"></div>
+        </div>
+        <div id="nav2">
+          <div class="nav"><img src="img/gap.png" style="width:59px;height:59px;"></div>
+          <div class="nav">
+            <img src="img/left.png" onmouseover="this.src='img/left_d.png'" onmouseout="this.src='img/left.png'" 
+                  onclick="horizontal(true)" style="width:59px;height:59px;"></div>
+          <div class="nav">
+            <img src="img/centre.png" onmouseover="this.src='img/centre_d.png'" 
+                  onmouseout="this.src='img/centre.png'" 
+                  onclick="home()" style="width:59px;height:59px;"></div>
+          <div class="nav">
+            <img src="img/right.png" onmouseover="this.src='img/right_d.png'" onmouseout="this.src='img/right.png'" 
+                  onclick="horizontal(false)" style="width:59px;height:59px;"></div>
+        </div>
+        <div id="nav3">
+          <div class="nav">
+            <img src="img/gap.png" style="width:59px;height:59px;"></div>
+          <div class="nav">
+            <img src="img/gap.png" style="width:59px;height:59px;"></div>
+          <div class="nav">
+            <img src="img/down.png" onmouseover="this.src='img/down_d.png'" onmouseout="this.src='img/down.png'"
+                  onclick="vertical(false)" style="width:59px;height:59px;"></div>
+          <div class="nav">
+            <img src="img/gap.png" style="width:59px;height:59px;"></div>
+          <div class="nav">
+            <img src="img/gap.png" style="width:59px;height:59px;"></div>
+        </div>
+      </div><!-- END NAVIGATION -->
 
-    <div id="slider"><!-- SLIDER BAR -->
-      <h4>min <input id="vertex-slider" type="range" min="3" max="10" step="1" value="5" /> max</h4>
-    </div><!-- END SLIDER BAR -->
-
+      <div id="slider"><!-- SLIDER BAR -->
+        <h4>min 
+          <input id="vertex-slider" type="range" min="3" max="10" step="1" value="5"/>
+           max</h4>
+      </div><!-- END SLIDER BAR -->
     
     </div><!-- END VERTEX -->
+  
   </div><!-- END GUI WINDOW -->
 
 
   <div id="footer"><!--  FOOTER CONTROLS -->
     
-    <div id="counter">
+    <div id="counter"> <!-- COUNTER -->
       <h2 id="count">number of vertices</h2>
-    </div>
+    </div><!-- END COUNTER -->
 
-    <div id="information">
+    <div id="information"><!-- INFORMATION -->
       <h5 id="where"> </h5>
-    </div>
+    </div><!-- END INFORMATION -->
 
   </div><!-- END FOOTER CONTROLS -->
 
