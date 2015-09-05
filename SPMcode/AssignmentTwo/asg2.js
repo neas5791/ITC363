@@ -344,6 +344,7 @@ function reset(){
     transList = [];
     // reset the vertex counter
     setHtmlUi();
+    setHtmlDetails("");
 }
 
 // clear the canvas 
