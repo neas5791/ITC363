@@ -27,6 +27,7 @@ var thetaLoc; // vertex_shader rotation variable
 var trans       = [0.0,0.0,0.0]; // displacement of triangle's origin
 var origin; // the centre of the polygon (determined by averaging the vertices)
 var mv; // the transformation matrix
+var isIntersect = false; // boolean statement for intersection
 
 var theta = 0.0;
 var displacementX = [ 0.05, 0, 0 ]; // the positive amount to move the object when translating in X direction
@@ -210,7 +211,11 @@ function error() {
     // set fragment shader variable fColour to RED draw the lines 
     // that represents the last segement that does not meet criteria
     gl.uniform4fv(colLoc, flatten(RED));
-    gl.drawArrays(gl.LINE_STRIP, index - 1, 2);
+    if (isIntersect)
+        gl.drawArrays(gl.LINE_LOOP, index - 2, 3);
+    else
+        gl.drawArrays(gl.LINE_STRIP, index - 1, 2);
+
     console.log("error now draw the bad stuff");
 }
 
@@ -246,6 +251,7 @@ function checkWindings(){
 // It is assumed that checkIntersection is run after a windings check
 // has been confirmed as acceptable.
 function checkIntersection(){
+    console.log("test intersection");
     // check that there are enough vertices
     if (index <= 2)
         return false;
@@ -255,14 +261,31 @@ function checkIntersection(){
     for ( var i = 0; i < edges.length; i++) {
         // push the first edge pair set into the array
         Array.prototype.push.apply(test_intersection, edges[i]);
+
         // push the last edge pair of vertices to the temp array
         test_intersection.push(vertices[index -1], vertices[index]);
+
         // test the two edge array. if the edges intersect return true 
         if ( intersecting(test_intersection) ){
             // interscetion found
             console.log("intersection of the bad kind found grrrr!");
             return true;
         }
+
+        test_intersection.pop();
+        test_intersection.pop();
+
+        // push the last edge pair of vertices to the temp array
+        test_intersection.push(vertices[index - 2], vertices[index]);        
+        showArray(test_intersection);
+        // test the two edge array. if the edges intersect return true 
+        if ( intersecting(test_intersection) ){
+            // interscetion found
+            isIntersect = true;
+            console.log("intersection of the bad kind found grrrr the second kind!");
+            return true;
+        }
+
         // clear the temp array ready for the next loop and test
         test_intersection = [];
     }
@@ -273,6 +296,7 @@ function checkIntersection(){
 // Tests if the line segments are intersecting
 // vlist is an array containing 4 2D points in order P0, P1, Q0, Q1
 function intersecting(vlist) {
+    isIntersect = false;
     // showArray(vlist);
     var pq = subtract(vlist[2], vlist[0]);  // The vector from P0 to Q0 (i.e. Q0-P0)
     var v = subtract(vlist[1], vlist[0]);   // The vector from P0 to P1
