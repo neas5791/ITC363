@@ -7,7 +7,7 @@ var vertices    = []; // array of vec3 vertices
 
 var index       = 0; // current count of vertices
 var vCount      = 5; // default number of vertices use wishes to display
-var maxVertices = 11; // maximum number of vertices buffer can accomodate
+var maxVertices = 16; // maximum number of vertices buffer can accomodate
 
 var GREEN       = vec4(0.0, 1.0, 0.0, 1.0);
 var RED         = vec4(1.0, 0.0, 0.0, 1.0);
