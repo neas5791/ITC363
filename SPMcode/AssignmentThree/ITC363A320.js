@@ -3,50 +3,89 @@
 // The constructor function for a tree
 // Arguments: a vec3 location, a floating-point angle (degrees) and a vec3 scales
 function Tree(){
-	var loc = vec3( Math.random() * 2 - 1, 0, Math.random() * 2 - 1);
-	var scale = ( Math.floor( Math.random() * 10 ) + 1 ) / 300;
-	var scales = vec3( scale, 0.0, scale );
+
+	var loc = vec3 ( 0, 0, 0);
+
+	// var loc = vec3( Math.random() * 2 - 1, 0, Math.random() * 2 - 1);
+	// var scale = ( Math.floor( Math.random() * 10 ) + 1 ) / 300;
+	// var scales = vec3( scale, 0.0, scale );
 }
 
 // A star's render function
 Tree.prototype.render = function() {
 	// gl.uniformMatrix4fv(matLoc, false, flatten(this.trs));
-	// gl.drawArrays(gl.TRIANGLE_FAN, 0, Tree.NV);
+	console.log("in Tree render function");
+	gl.drawArrays(gl.TRIANGLE_FAN, 0, Tree.NV + 1);
 };
 
 Tree.NV = 6;	// The number of vertices - a class field
 
 Tree.initModel = function() {
 	var vertices = [];
-	var height = 8;
+	var height = 1;
 	var radius = 5;
 	var triangles = 6;
-	// vertices.push( vec3( 0, height, 0 ) );
+	vertices.push( vec3( 0, height, 0 ) );
 	// pushes all of the vertices to the array
 
 	// this loop creates the vertices on the circumfrence
-	for ( var i = 1; i <= triangles; i++ ) {
+	for ( var i = 0; i < triangles; i++ ) {
 		var x = Math.cos( i * ( 360 / triangles ) * Math.PI / 180);// * radius;
 		var z = Math.sin( i * ( 360 / triangles ) * Math.PI / 180);// * radius;
 		vertices.push( vec3( x, 0, z) );
 		console.log(vertices[i]);
+	}
+
+
+
+	// var counter = divisions;
+	// var t = [] ;
+	// vertices = [0,1,2,3,4,5,6];
+	var test = [];
+	var isTrue = true;
+	// var str;
+	// var str2;
+	for (var i = 0; i < triangles ; i++) {
+
+
+		if ( (i % 2) == 0 ) {
+			console.log("even " + i);
+
+			test.push( vertices[ ( ( i + 1 ) > divisions ) ? ( - divisions + ( i + 1 ) ) : i + 1 ] );
+			test.push( vertices[ 0 ] );	
+			test.push( vertices[ ( ( i + 2 ) > divisions ) ? ( - divisions + ( i + 2 ) ) : i + 2 ] );
+			
+		} 
+		else {
+			console.log("odd " + i);
+
+			test.push( vertices[ ( ( i + 1 ) > divisions ) ? ( - divisions + ( i + 1 ) ) : i + 1 ] );
+			test.push( vertices[ ( ( i + 2 ) > divisions ) ? ( - divisions + ( i + 2 ) ) : i + 2 ] );
+			test.push( vertices[ 0 ] );	
+
+		}
 
 	}
 
+
+
 	// push the origin to the start of the array
-	vertices.shift( vec3 ( 0, height, 0) );
+	
+	console.log("********************" + vertices.length);
+	for (var i = 0; i < vertices.length; i++) {
+		console.log(vertices[i]);
+	}
 
-
-	return vertices;
+	return test;
 
 }
-Tree.vertices = Tree.initModel;  // The model vertices - a class field
+Tree.vertices = Tree.initModel();  // The model vertices - a class field
 // ------------------------------------------------------------------------------------
 
 var canvas;
 var gl;
 
-var trees = [];				// The array of stars
+var tree;			// The array of stars
 var NTrees = 1;			// The number of stars
 
 window.onload = function init() {
@@ -55,10 +94,12 @@ window.onload = function init() {
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
-    // Set up the array of trees
-    for (var n = 0; n < NTrees; n++) {
-		trees.push( new Tree() );
-	}
+    tree = new Tree();
+
+ //    // Set up the array of trees
+ //    for (var n = 0; n < NTrees; n++) {
+	// 	trees.push( new Tree() );
+	// }
 
 
     //
@@ -91,7 +132,7 @@ window.onload = function init() {
 function render() {
 
     gl.clear(gl.COLOR_BUFFER_BIT);
-    	trees[0].render();
+    tree.render();
     // gl.drawArrays(gl.TRIANGLE_FAN, 0, 5);
     // Instance transform is sent and rendering done in an instance method
   //   for (var n = 0; n < NTrees; n++) {
