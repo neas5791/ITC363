@@ -1,0 +1,9 @@
+http://stackoverflow.com/questions/2684630/mockito-how-to-make-a-method-return-an-argument-that-was-passed-to-it
+
+https://www.google.com.au/search?q=mockito+tutorial&rlz=1C1GIWA_enAU597AU597&oq=mockito+tutorial&aqs=chrome..69i57.4880j0j1&sourceid=chrome&es_sm=93&ie=UTF-8#q=mockito+tutorial+for+junit
+
+http://www.vogella.com/tutorials/Mockito/article.html
+
+http://stackoverflow.com/questions/20353846/mockito-difference-between-doreturn-and-when
+
+https://mockito.googlecode.com/hg-history/1.8.0/javadoc/org/mockito/Mockito.html
