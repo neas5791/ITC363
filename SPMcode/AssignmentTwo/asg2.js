@@ -7,7 +7,7 @@ var vertices    = []; // array of vec3 vertices
 
 var index       = 0; // current count of vertices
 var vCount      = 5; // default number of vertices use wishes to display
-var maxVertices = 11; // maximum number of vertices buffer can accomodate
+var maxVertices = 16; // maximum number of vertices buffer can accomodate
 
 var GREEN       = vec4(0.0, 1.0, 0.0, 1.0);
 var RED         = vec4(1.0, 0.0, 0.0, 1.0);
@@ -27,12 +27,13 @@ var thetaLoc; // vertex_shader rotation variable
 var trans       = [0.0,0.0,0.0]; // displacement of triangle's origin
 var origin; // the centre of the polygon (determined by averaging the vertices)
 var mv; // the transformation matrix
+var isIntersect = false; // boolean statement for intersection
 
 var theta = 0.0;
 var displacementX = [ 0.05, 0, 0 ]; // the positive amount to move the object when translating in X direction
 var displacementY = [ 0, 0.05, 0 ]; // the positive amount to move the object when translating in Y direction
 var displacementR = 5.0; // the positive amount to rotate the object about an axis
-var transList = [];
+var transList = []; // the list of transfromation that have been applied to the object 
 
 window.onload = function() {
     // console.log(String.fromCharCode(27));
@@ -149,6 +150,7 @@ window.onload = function() {
     render();
 }
 
+// renders the object
 function render(){
     // cleans the screen paints canvas 
     gl.clear( gl.COLOR_BUFFER_BIT );
@@ -156,7 +158,8 @@ function render(){
     gl.uniformMatrix4fv(matLoc, false, flatten(mv));
 
     gl.uniform4fv(colLoc, flatten(BLACK));
-    gl.drawArrays(gl.LINE_STRIP, 0, index);
+
+    drawLoop();
 
     // Calculate the modelview matrix and send
 
@@ -176,20 +179,50 @@ function render(){
     }
 }
 
+// this function draws the outlines of the polygon that will be rendered
+function drawLoop(){
+    // while there are less than 3 vertices just draw a line strip
+    if (index < 3) {
+        console.log("index < 3");
+        gl.drawArrays(gl.LINE_STRIP, 0, index);
+    }
+    // now we have enough vertices to draw triangles
+    // so we construct LINE_LOOPS over three vertices
+    else {
+        console.log("index > 3");
+        // draw the first triangle
+        gl.drawArrays(gl.LINE_LOOP, 0, 3);
+        // now loop through the rest and draw the rest
+        for (var i = 3 ; i < index ; i++){
+            gl.drawArrays( gl.LINE_LOOP, i - 2 , 3 ); 
+        }
+    }
+}
+
 // renders the object showing offending line segment.
 function error() {
     // cleans the screen paints canvas 
     gl.clear( gl.COLOR_BUFFER_BIT );
     console.log("error = " + index);
     gl.uniform4fv(colLoc, flatten(BLACK));
-    gl.drawArrays(gl.LINE_STRIP, 0, index );
-    console.log("error draw good stuff");
+    
+    drawLoop();
+    
+    console.log("error draw the good stuff first");
     // set fragment shader variable fColour to RED draw the lines 
     // that represents the last segement that does not meet criteria
     gl.uniform4fv(colLoc, flatten(RED));
-    gl.drawArrays(gl.LINE_STRIP, index - 1, 2);
-    console.log("error draw bad stuff");
+    if (isIntersect)
+        gl.drawArrays(gl.LINE_LOOP, index - 2, 3);
+    else
+        gl.drawArrays(gl.LINE_STRIP, index - 1, 2);
+
+    console.log("error now draw the bad stuff");
 }
+
+/* ******************************************************* */
+// ****** below functions are for vertices testing ******* //
+/* ******************************************************* */
 
 // Checks the winding direction of a set of vetices and compares the result with last 
 // winding result which is stored in the rotation variable.
@@ -223,6 +256,7 @@ function checkWindings(){
 // It is assumed that checkIntersection is run after a windings check
 // has been confirmed as acceptable.
 function checkIntersection(){
+    console.log("test intersection");
     // check that there are enough vertices
     if (index <= 2)
         return false;
@@ -232,14 +266,31 @@ function checkIntersection(){
     for ( var i = 0; i < edges.length; i++) {
         // push the first edge pair set into the array
         Array.prototype.push.apply(test_intersection, edges[i]);
+
         // push the last edge pair of vertices to the temp array
         test_intersection.push(vertices[index -1], vertices[index]);
+
         // test the two edge array. if the edges intersect return true 
         if ( intersecting(test_intersection) ){
             // interscetion found
             console.log("intersection of the bad kind found grrrr!");
             return true;
         }
+
+        test_intersection.pop();
+        test_intersection.pop();
+
+        // push the last edge pair of vertices to the temp array
+        test_intersection.push(vertices[index - 2], vertices[index]);        
+        showArray(test_intersection);
+        // test the two edge array. if the edges intersect return true 
+        if ( intersecting(test_intersection) ){
+            // interscetion found
+            isIntersect = true;
+            console.log("intersection of the bad kind found grrrr the second kind!");
+            return true;
+        }
+
         // clear the temp array ready for the next loop and test
         test_intersection = [];
     }
@@ -250,6 +301,7 @@ function checkIntersection(){
 // Tests if the line segments are intersecting
 // vlist is an array containing 4 2D points in order P0, P1, Q0, Q1
 function intersecting(vlist) {
+    isIntersect = false;
     // showArray(vlist);
     var pq = subtract(vlist[2], vlist[0]);  // The vector from P0 to Q0 (i.e. Q0-P0)
     var v = subtract(vlist[1], vlist[0]);   // The vector from P0 to P1
@@ -297,6 +349,7 @@ function setCentre() {
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
     gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW );
 }
+
 // reset the state machine ready to sart again
 function reset(){
     // I had to add the following two lines to fix a random bug
@@ -317,9 +370,12 @@ function reset(){
     trans = [0.0, 0.0, 0.0];
     theta = 0;
     mv = mat4();
+    transList = [];
     // reset the vertex counter
     setHtmlUi();
+    setHtmlDetails("");
 }
+
 // clear the canvas 
 function clearCanvas() {
     // call to reset state information
@@ -329,21 +385,27 @@ function clearCanvas() {
 
     console.log("clearCanvas called");
 }
+
 // updates the html element with count of how many vertices are currently selected
 function setHtmlUi() {
     // sets the count element
-    document.getElementById("count").innerHTML = index + " of " + vCount + " selected";
+    document.getElementById("count").innerHTML = index + " of " + vCount + " Vertices selected";
 }
+
 // moves th model to the canvas frame 0,0,0 position
 function home() {
+    if ( index != vCount ) {
+        return;
+    }
     // reset state variables
     theta = 0;
     trans = [0,0,0]; // issue 
     mv = mat4();
-    transList = [];
-
+    whereami();
     render();   
 }
+
+// function provides the what to do on keyboard event
 function keyboardEvent(event){
     var key = event.keyCode;
     
@@ -407,12 +469,17 @@ function keyboardEvent(event){
     };
 }
 
-/* ************************************** */
-// below functions are for object movment //
+/* ******************************************************* */
+// below functions are for object translation and rotation //
+/* ******************************************************* */
+
+// translates the object by the vec3 t argument
+// updates the global trans variable.
 function movePolygon(t){
     trans = add(trans, t);
     mv = mult(mv, translate(t));
 }
+
 // turn the object about the z axis 
 // a true argument moves the polygon object clockwise
 // a false argument moves the polygon object anticlockwise
@@ -436,10 +503,12 @@ function turn(clockwise){
     whereami();
     render();
 }
+
 // converts degrees to radians
 function toRadians(degrees){
   return degrees * Math.PI / 180;  
 }
+
 // set the value of global variable theta
 function setTheta(deltaTheta){
     theta = theta + deltaTheta;
@@ -448,6 +517,7 @@ function setTheta(deltaTheta){
     else if (theta < 0)
         theta += 360;
 }
+
 // translate object in vertical direction
 // a TRUE direction will translate the object in a 
 // positive direction along the window Y axis
@@ -473,6 +543,7 @@ function vertical(direction){
     whereami();
     render();
 }
+
 // translate object in horizontal direction
 // a TRUE direction will translate the object in a 
 // positive direction along the window X axis
@@ -498,7 +569,11 @@ function horizontal(direction){
     whereami();
     render();
 }
-/* *** UTILITY FUNCTIONS BELOW *** */
+
+/* ************************************* */
+// ****** UTILITY FUNCTIONS BELOW ****** //
+/* ************************************* */
+
 // reports the current state information to the console
 function state(){
     // logs current state to console
@@ -549,7 +624,9 @@ function whereami(){
     //document.getElementById("where").innerHTML = locDis;
     setHtmlDetails(locDis);
 }
+// update the HTML element with the text argument
 function setHtmlDetails(text){
+
     document.getElementById("where").innerHTML = text;
 }
 
