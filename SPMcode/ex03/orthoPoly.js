@@ -9,20 +9,19 @@
 var canvas;
 var gl;
 
-var numVertices  = 36;
+var numVertices  = 18;
 
 var pointsArray = [];
 var colorsArray = [];
 
-var vertices = [
-	vec4( -0.5, -0.5,  0.5, 1.0 ),
-	vec4( -0.5,  0.5,  0.5, 1.0 ),
-	vec4( 0.5,  0.5,  0.5, 1.0 ),
-	vec4( 0.5, -0.5,  0.5, 1.0 ),
-	vec4( -0.5, -0.5, -0.5, 1.0 ),
-	vec4( -0.5,  0.5, -0.5, 1.0 ),
-	vec4( 0.5,  0.5, -0.5, 1.0 ),
-	vec4( 0.5, -0.5, -0.5, 1.0 ),
+vertices = [
+    vec4(   0.0 , 0.75 ,       0.0        , 1.0 ),
+    vec4(   0.5 , 0.00 ,       0.0        , 1.0 ),
+    vec4(  0.25 , 0.00 ,  Math.sqrt(3)/4  , 1.0 ),
+    vec4( -0.25 , 0.00 ,  Math.sqrt(3)/4  , 1.0 ),
+    vec4( - 0.5 , 0.00 ,       0.0        , 1.0 ),
+    vec4( -0.25 , 0.00 ,  -Math.sqrt(3)/4 , 1.0 ),
+    vec4(  0.25 , 0.00 ,  -Math.sqrt(3)/4 , 1.0 )
 ];
 
 var vertexColors = [
@@ -36,13 +35,12 @@ var vertexColors = [
 	vec4( 1.0, 1.0, 1.0, 1.0 ),  // white
 ];
 
-var near = 0.1;			// non-negative and < cube limit
-var far = 2.0;			// > cube limit
+var near = -1;
+var far = 1;
 var radius = 1.0;
-var theta  = Math.PI/3.0;	// Begin at 60 degrees
-var phi    = Math.PI/4.0;			// Begin at 45 degrees
-var dr = 2.0 * Math.PI/180.0;		// Make fine angular changes
-var minTheta = 5.0*Math.PI/180.0;	// Closest approach to poles
+var theta  = 0.0;
+var phi    = 0.0;
+var dr = 5.0 * Math.PI/180.0;
 
 var left = -1.0;
 var right = 1.0;
@@ -50,40 +48,33 @@ var ytop = 1.0;
 var bottom = -1.0;
 
 
-var mvMatrix, pMatrix;
-var modelView, projection;
+var modelViewMatrix, projectionMatrix;
+var modelViewMatrixLoc, projectionMatrixLoc;
 var eye;
 
 const at = vec3(0.0, 0.0, 0.0);
-const up = vec3(0.0, 0.0, 1.0);  // Align camera to polar direction
-
-// quad uses first index to set color for face
-
-function quad(a, b, c, d) {
-	pointsArray.push(vertices[a]);
-	colorsArray.push(vertexColors[a]);
-	pointsArray.push(vertices[b]);
-	colorsArray.push(vertexColors[a]);
-	pointsArray.push(vertices[c]);
-	colorsArray.push(vertexColors[a]);
-	pointsArray.push(vertices[a]);
-	colorsArray.push(vertexColors[a]);
-	pointsArray.push(vertices[c]);
-	colorsArray.push(vertexColors[a]);
-	pointsArray.push(vertices[d]);
-	colorsArray.push(vertexColors[a]);
-}
+const up = vec3(0.0, 1.0, 0.0);
 
 // Each face determines two triangles
-
-function colorCube() {
-    quad( 1, 0, 3, 2 );
-    quad( 2, 3, 7, 6 );
-    quad( 3, 0, 4, 7 );
-    quad( 6, 5, 1, 2 );
-    quad( 4, 5, 6, 7 );
-    quad( 5, 4, 0, 1 );
+function triags(a, b, c) {
+    pointsArray.push(vertices[a]);
+    colorsArray.push(vertexColors[b]); 
+    pointsArray.push(vertices[b]);
+    colorsArray.push(vertexColors[b]); 
+    pointsArray.push(vertices[c]);
+    colorsArray.push(vertexColors[b]); 
 }
+
+// Each face
+function createTriangles() {
+    triags( 0, 6, 5 );
+    triags( 0, 5, 4 );
+    triags( 0, 4, 3 );
+    triags( 0, 3, 2 );
+    triags( 0, 2, 1 );
+    triags( 0, 1, 6 );
+}
+
 
 
 window.onload = function init() {
@@ -104,7 +95,7 @@ window.onload = function init() {
     var program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
 
-    colorCube();
+    createTriangles();
 
     var cBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
@@ -127,10 +118,14 @@ window.onload = function init() {
 
 // buttons to change viewing parameters
 //	add call to render following any change KWL 06/08/2015
-    document.getElementById("Button1").onclick = function(){near  *= 0.9; far *= 1.1; render();};
-    document.getElementById("Button2").onclick = function(){near *= 1.1; far *= 0.9; render();};
-    document.getElementById("Button3").onclick = function(){radius *= 1.1; render();};
-    document.getElementById("Button4").onclick = function(){radius *= 0.9; render();};
+    document.getElementById("Button1").onclick = function(){near  *= 1.1; far *= 1.1;};
+    document.getElementById("Button2").onclick = function(){near *= 0.9; far *= 0.9;};
+    document.getElementById("Button3").onclick = function(){radius *= 1.1;};
+    document.getElementById("Button4").onclick = function(){radius *= 0.9;};
+    document.getElementById("Button5").onclick = function(){theta += dr;};
+    document.getElementById("Button6").onclick = function(){theta -= dr;};
+    document.getElementById("Button7").onclick = function(){phi += dr;};
+    document.getElementById("Button8").onclick = function(){phi -= dr;};
 // keys to change viewing position
 	window.onkeydown = function(event) {
 		var key = String.fromCharCode(event.keyCode);

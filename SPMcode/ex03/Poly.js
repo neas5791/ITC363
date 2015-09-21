@@ -33,13 +33,13 @@ window.onload = function init()
     // Four Vertices
     
     vertices = [
-        vec4(   0.0,      0.0        , 0.75 , 1.0 ),
-        vec4(   0.5,      0.0        , 0.0  , 1.0 ),
-        vec4(  0.25,  Math.sqrt(3)/4 , 0.0  , 1.0 ),
-        vec4( -0.25,  Math.sqrt(3)/4 , 0.0  , 1.0 ),
-        vec4( - 0.5,      0.0        , 0.0  , 1.0 ),
-        vec4( -0.25, -Math.sqrt(3)/4 , 0.0  , 1.0 ),
-        vec4(  0.25, -Math.sqrt(3)/4 , 0.0  , 1.0 ),
+        vec4(   0.0, 0.75 ,       0.0        , 1.0 ),
+        vec4(   0.5, 0.00 ,       0.0        , 1.0 ),
+        vec4(  0.25, 0.00 ,  Math.sqrt(3)/4  , 1.0 ),
+        vec4( -0.25, 0.00 ,  Math.sqrt(3)/4  , 1.0 ),
+        vec4( - 0.5, 0.00 ,       0.0        , 1.0 ),
+        vec4( -0.25, 0.00 ,  -Math.sqrt(3)/4 , 1.0 ),
+        vec4(  0.25, 0.00 ,  -Math.sqrt(3)/4 , 1.0 )
     ];
 
 
@@ -83,162 +83,22 @@ window.onload = function init()
     colLoc = gl.getUniformLocation(program, "fColour");
     matLoc = gl.getUniformLocation(program, "modelview");
     window.onkeydown = function( event ) {
-        var key = event.keyCode;
-        switch( key ) {
-          case 119:
-          case 87:
-            // w key
-            console.log(String.fromCharCode(key));
-
-            var thetaRadian = toRadians(theta); // * Math.PI / 180.0;
-            var tX = 1 * Math.sin(thetaRadian) * displacementY[1]; // x component of transfromation
-            var tY = Math.cos(thetaRadian) * displacementY[1]; // y component of transfromation
-
-            var t = [tX, tY, 0]; // transformation based on rotatation
-            
-            movePolygon(t);            
-            break;
-          case 115:
-          case 83:
-            // s key
-            console.log(String.fromCharCode(key));
-
-            var thetaRadian = theta * Math.PI / 180.0;
-            var tX = 1 * Math.sin(thetaRadian) * displacementY[1]; // x component of transfromation
-            var tY = Math.cos(thetaRadian) * displacementY[1]; // y component of transfromation
-            
-
-            var t = [-tX, -tY, 0]; // transformation based on rotatation
-
-            movePolygon(t);
-            break;
-          case 97:
-          case 65:
-            // a key
-            console.log(String.fromCharCode(key));
-            
-            var thetaRadian = theta * Math.PI / 180.0;
-
-            var tX = Math.cos(thetaRadian) * displacementX[0]; // x component of transfromation
-            var tY = Math.sin(thetaRadian) * displacementX[0]; // y component of transfromation
-
-            var t = [-tX, tY, 0]; // transformation based on rotatation
-
-            movePolygon(t);
-            break;
-          case 100:
-          case 68:
-            // d key
-            console.log(String.fromCharCode(key));
-
-            var thetaRadian = theta * Math.PI / 180.0;
-
-            var tX = Math.cos(thetaRadian) * displacementX[0]; // x component of transfromation
-            var tY = Math.sin(thetaRadian) * displacementX[0]; // y component of transfromation
-
-            var t = [tX, -tY, 0]; // transformation based on rotatation
-
-            movePolygon(t);
-            break;
-          case 27:
-            // escape key
-            console.log("Esc");
-            // clearCanvas();
-            break;
-          case 113:
-          case 81:
-            // q key
-            console.log(String.fromCharCode(key));
-            setTheta(displacementR);
-            var moveCentre = scale(-1, trans);
-            var rotat = rotate(displacementR, [0,0,1]);
-            var movePo = scale(-1, moveCentre);
-
-            // translate the object back to the original position
-            // on the canvas i.e. rotate about the single point on the canvas
-            var chordR = ( displacementR / 2 ) * Math.PI / 180.0;
-            var chord = 2 * Math.sin( chordR ) * trans[1];
-            var tX = Math.cos(chordR) * chord;
-            var tY = Math.sin(chordR) * chord;
-
-            var t = [tX, -tY, 0];
-
-            // model the transfomrations
-            mv = mult(mv, translate(moveCentre));
-            mv = mult(mv, rotat);
-            mv = mult(mv, translate(movePo));
-            mv = mult(mv, translate(t));
-
-            break;
-          case 101:
-          case 69:
-            // e key
-            console.log(String.fromCharCode(key));
-            setTheta(-1* displacementR);
-            var moveCentre = scale(-1, trans);
-            var rotat = rotate(-1 * displacementR, [0,0,1]);
-            var movePo = scale(-1, moveCentre);
-
-            // translate the object back to the original position
-            // on the canvas i.e. rotate about the single point on the canvas
-            var chordR = toRadians(displacementR / 2 );//( displacementR / 2 ) * Math.PI / 180.0;
-            var chord = 2 * Math.sin( toRadians( chordR ) ) * trans[1];
-            var tX = Math.cos(chordR) * chord;
-            var tY = Math.sin(chordR) * chord;
-
-            var t = [-tX, tY, 0];
-
-            // model the transfomrations
-            mv = mult(mv, translate(moveCentre));
-            mv = mult(mv, rotat);
-            mv = mult(mv, translate(movePo));
-            mv = mult(mv, translate(t));
-
-            break;
-          case 122:
-          case 90:
-            // e key
-            console.log(String.fromCharCode(key));
-            setTheta(-1* displacementR);
-            var moveCentre = scale(-1, trans);
-            var rotat = rotate(-1 * displacementR, [1,0,0]);
-            var movePo = scale(-1, moveCentre);
-
-            // translate the object back to the original position
-            // on the canvas i.e. rotate about the single point on the canvas
-            var chordR = toRadians(displacementR / 2 );//( displacementR / 2 ) * Math.PI / 180.0;
-            var chord = 2 * Math.sin( toRadians( chordR ) ) * trans[1];
-            var tX = Math.cos(chordR) * chord;
-            var tY = Math.sin(chordR) * chord;
-
-            var t = [-tX, tY, 0];
-
-            // model the transfomrations
-            mv = mult(mv, translate(moveCentre));
-            mv = mult(mv, rotat);
-            mv = mult(mv, translate(movePo));
-            mv = mult(mv, translate(t));
-
-            break;
-        }
+        keyevent(event);
         whereami();
         render();
     };
 
     render();
-};
+}
 
 
 function render() {
     gl.clear( gl.COLOR_BUFFER_BIT );
-    // console.log(trans); // deleted 20150831
-    // mv = translate(trans); // deleted 20150831 don need we set the mv matrix when interaction is handled
+    
     gl.uniformMatrix4fv(matLoc, false, flatten(mv));
     gl.uniform4fv(colLoc, flatten(BLACK));
     gl.drawArrays( gl.TRIANGLES, 0, pointsArray.length );
 
-    // gl.uniform4fv(colLoc, flatten(BLACK));
-    // gl.drawArrays (gl.POINTS, 0, NV + 2);
     for (var n = 0; n < pointsArray.length; n++ ) {
         console.log(pointsArray[n]);
     }
@@ -253,8 +113,7 @@ function triangles(a, b, c) {
     pointsArray.push(vertices[c]);
 }
 
-// Each face determines two triangles
-
+// Each face
 function createTriangles() {
     triangles( 0, 6, 5 );
     triangles( 0, 5, 4 );
@@ -263,8 +122,6 @@ function createTriangles() {
     triangles( 0, 2, 1 );
     triangles( 0, 1, 6 );
 }
-
-
 
 // point is the vec3 vertices that represents the centre of the 
 function rotatep(angle, point){
@@ -275,17 +132,7 @@ function rotatep(angle, point){
 }
 function movePolygon(t){
     trans = add(trans, t);
-    // console.log(trans);
     mv = mult(mv, translate(t));//test  
-
-    // trans = trans2;
-
-    // console.log(trans2);
-
-    // // trans = add(trans, [0, 0.01, 0]);
-    // mv = mat4();
-    // mv = mult(mv, translate(trans));
-    // render();
 }
 function home() {
     // reset state variables
@@ -296,6 +143,7 @@ function home() {
     document.getElementById("where").innerHTML = "";
     render();   
 }
+
 var transList = [];
 
 function whereami(){
@@ -338,4 +186,145 @@ function getTheta(){
 }
 function toRadians(degrees){
   return degrees * Math.PI / 180;  
+}
+
+function keyevent(event){
+    var key = event.keyCode;
+    switch( key ) {
+      case 119:
+      case 87:
+        // w key
+        console.log(String.fromCharCode(key));
+
+        var thetaRadian = toRadians(theta); // * Math.PI / 180.0;
+        var tX = 1 * Math.sin(thetaRadian) * displacementY[1]; // x component of transfromation
+        var tY = Math.cos(thetaRadian) * displacementY[1]; // y component of transfromation
+
+        var t = [tX, tY, 0]; // transformation based on rotatation
+        
+        movePolygon(t);            
+        break;
+      case 115:
+      case 83:
+        // s key
+        console.log(String.fromCharCode(key));
+
+        var thetaRadian = theta * Math.PI / 180.0;
+        var tX = 1 * Math.sin(thetaRadian) * displacementY[1]; // x component of transfromation
+        var tY = Math.cos(thetaRadian) * displacementY[1]; // y component of transfromation
+        
+
+        var t = [-tX, -tY, 0]; // transformation based on rotatation
+
+        movePolygon(t);
+        break;
+      case 97:
+      case 65:
+        // a key
+        console.log(String.fromCharCode(key));
+        
+        var thetaRadian = theta * Math.PI / 180.0;
+
+        var tX = Math.cos(thetaRadian) * displacementX[0]; // x component of transfromation
+        var tY = Math.sin(thetaRadian) * displacementX[0]; // y component of transfromation
+
+        var t = [-tX, tY, 0]; // transformation based on rotatation
+
+        movePolygon(t);
+        break;
+      case 100:
+      case 68:
+        // d key
+        console.log(String.fromCharCode(key));
+
+        var thetaRadian = theta * Math.PI / 180.0;
+
+        var tX = Math.cos(thetaRadian) * displacementX[0]; // x component of transfromation
+        var tY = Math.sin(thetaRadian) * displacementX[0]; // y component of transfromation
+
+        var t = [tX, -tY, 0]; // transformation based on rotatation
+
+        movePolygon(t);
+        break;
+      case 27:
+        // escape key
+        console.log("Esc");
+        // clearCanvas();
+        break;
+      case 113:
+      case 81:
+        // q key
+        console.log(String.fromCharCode(key));
+        setTheta(displacementR);
+        var moveCentre = scale(-1, trans);
+        var rotat = rotate(displacementR, [0,0,1]);
+        var movePo = scale(-1, moveCentre);
+
+        // translate the object back to the original position
+        // on the canvas i.e. rotate about the single point on the canvas
+        var chordR = ( displacementR / 2 ) * Math.PI / 180.0;
+        var chord = 2 * Math.sin( chordR ) * trans[1];
+        var tX = Math.cos(chordR) * chord;
+        var tY = Math.sin(chordR) * chord;
+
+        var t = [tX, -tY, 0];
+
+        // model the transfomrations
+        mv = mult(mv, translate(moveCentre));
+        mv = mult(mv, rotat);
+        mv = mult(mv, translate(movePo));
+        mv = mult(mv, translate(t));
+
+        break;
+      case 101:
+      case 69:
+        // e key
+        console.log(String.fromCharCode(key));
+        setTheta(-1* displacementR);
+        var moveCentre = scale(-1, trans);
+        var rotat = rotate(-1 * displacementR, [0,0,1]);
+        var movePo = scale(-1, moveCentre);
+
+        // translate the object back to the original position
+        // on the canvas i.e. rotate about the single point on the canvas
+        var chordR = toRadians(displacementR / 2 );//( displacementR / 2 ) * Math.PI / 180.0;
+        var chord = 2 * Math.sin( toRadians( chordR ) ) * trans[1];
+        var tX = Math.cos(chordR) * chord;
+        var tY = Math.sin(chordR) * chord;
+
+        var t = [-tX, tY, 0];
+
+        // model the transfomrations
+        mv = mult(mv, translate(moveCentre));
+        mv = mult(mv, rotat);
+        mv = mult(mv, translate(movePo));
+        mv = mult(mv, translate(t));
+
+        break;
+      case 122:
+      case 90:
+        // e key
+        console.log(String.fromCharCode(key));
+        setTheta(-1* displacementR);
+        var moveCentre = scale(-1, trans);
+        var rotat = rotate(-1 * displacementR, [1,0,0]);
+        var movePo = scale(-1, moveCentre);
+
+        // translate the object back to the original position
+        // on the canvas i.e. rotate about the single point on the canvas
+        var chordR = toRadians(displacementR / 2 );//( displacementR / 2 ) * Math.PI / 180.0;
+        var chord = 2 * Math.sin( toRadians( chordR ) ) * trans[1];
+        var tX = Math.cos(chordR) * chord;
+        var tY = Math.sin(chordR) * chord;
+
+        var t = [-tX, tY, 0];
+
+        // model the transfomrations
+        mv = mult(mv, translate(moveCentre));
+        mv = mult(mv, rotat);
+        mv = mult(mv, translate(movePo));
+        mv = mult(mv, translate(t));
+
+        break;
+    }
 }
