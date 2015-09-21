@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html>
   <head>
@@ -42,3 +43,49 @@ main()
 	<button id= "zButton">Rotate Z</button>
   </body>
 </html>
+=======
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type">
+    <title>Rotating Colour Cube 1</title>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+attribute vec4 vColour;
+varying vec4 fcolour;
+uniform mat4 modelview;
+
+void
+main()
+{
+    gl_Position = modelview*vPosition;
+    fcolour = vColour;
+}
+</script>
+    <script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+varying vec4 fcolour;
+
+void
+main()
+{
+    gl_FragColor = fcolour;
+}
+</script>
+    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../Common/initShaders.js"></script>
+    <script type="text/javascript" src="../Common/MV.js"></script>
+    <script type="text/javascript" src="rotCube1.js"></script>
+  </head>
+  <body>
+    <canvas id="gl-canvas" width="512" height="512">
+      Oops ... your browser doesn't support the HTML5 canvas element
+    </canvas>
+    <br/>
+	
+	<button id= "xButton">Rotate X</button>
+	<button id= "yButton">Rotate Y</button>
+	<button id= "zButton">Rotate Z</button>
+  </body>
+</html>
+>>>>>>> bb68148f39d36f4bb6c8ab72bf66680649fe0436
