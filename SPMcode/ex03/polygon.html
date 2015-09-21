@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="styles.css">
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+uniform mat4 modelview;
+uniform mat4 projection;
+
+void
+main()
+{
+	gl_PointSize = 5.0;
+    gl_Position = projection * modelview * vPosition;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+uniform vec4 fColour;
+
+void
+main()
+{
+    gl_FragColor = fColour;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="polygon.js"></script>
+</head>
+
+<body>
+  <div id="cframe">
+    <div id="canvas">
+      <canvas id="gl-canvas" width="512" height="512">
+      Oops ... your browser doesn't support the HTML5 canvas element
+      </canvas>
+    </div>
+  
+    <div id="vertexInfo">
+  		<h5 id="where"></h5>
+    </div>
+  </div>
+<div id="butts"
+  <!- <div..<button.. move</button..	</div.. >
+  <div id="home">
+    <button onclick="home()">home</button>
+  </div>
+  
+  <div id="whereamI">
+    <button onclick="whereami()">location</button>
+  </div>
+</div>
+<div id="otherbutts">
+  <div id="state">
+    <button onclick="state()">state</button>
+  </div>
+</div>
+
+
+</body>
+</html>

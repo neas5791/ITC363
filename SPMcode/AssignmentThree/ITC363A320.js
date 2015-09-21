@@ -15,78 +15,62 @@ function Tree(){
 Tree.prototype.render = function() {
 	// gl.uniformMatrix4fv(matLoc, false, flatten(this.trs));
 	console.log("in Tree render function");
-	gl.drawArrays(gl.TRIANGLE_FAN, 0, Tree.NV + 1);
+	if (Tree.count > 0){
+		Tree.printVertices(Tree.count);
+		gl.drawArrays( gl.POINT, 0, Tree.count + 1 );
+	}
 };
 
 Tree.NV = 6;	// The number of vertices - a class field
+
+Tree.count = 0;
+Tree.addCount = function(newCount){
+	if (newCount < (Tree.NV + 1))
+		Tree.count = newCount;
+
+	console.log("Number of vertices to display is " + Tree.count);
+}
+
+Tree.printVertices = function(numberOfVetices){
+	for (var i = 0; i < numberOfVetices+1; i++)
+		console.log("Vertex " + i + ": " + Tree.vertices[i]);
+}
 
 Tree.initModel = function() {
 	var vertices = [];
 	var height = 1;
 	var radius = 5;
 	var triangles = 6;
-	vertices.push( vec3( 0, height, 0 ) );
+	var angle = 360.0 / triangles;
+	vertices.push( vec3( 0, 0, 0 ) );
 	// pushes all of the vertices to the array
 
 	// this loop creates the vertices on the circumfrence
-	for ( var i = 0; i < triangles; i++ ) {
-		var x = Math.cos( i * ( 360 / triangles ) * Math.PI / 180);// * radius;
-		var z = Math.sin( i * ( 360 / triangles ) * Math.PI / 180);// * radius;
-		vertices.push( vec3( x, 0, z) );
-		console.log(vertices[i]);
+	for ( var i = 0; i <= triangles ; i++ ) {
+		var x = Math.cos( i * angle * Math.PI / 180) / 2;
+		var y = Math.sin( i * angle * Math.PI / 180) / 2;
+		vertices.push( vec3( x, y, 0) );
+		// console.log(vertices[i]);
 	}
 
+	// console.log("****************************");
+	// for (var i = 0; i < vertices.length; i++) {
+	// 	console.log(i + " : " + vertices[i]);	
+	// }
 
-
-	// var counter = divisions;
-	// var t = [] ;
-	// vertices = [0,1,2,3,4,5,6];
-	var test = [];
-	var isTrue = true;
-	// var str;
-	// var str2;
-	for (var i = 0; i < triangles ; i++) {
-
-
-		if ( (i % 2) == 0 ) {
-			console.log("even " + i);
-
-			test.push( vertices[ ( ( i + 1 ) > divisions ) ? ( - divisions + ( i + 1 ) ) : i + 1 ] );
-			test.push( vertices[ 0 ] );	
-			test.push( vertices[ ( ( i + 2 ) > divisions ) ? ( - divisions + ( i + 2 ) ) : i + 2 ] );
-			
-		} 
-		else {
-			console.log("odd " + i);
-
-			test.push( vertices[ ( ( i + 1 ) > divisions ) ? ( - divisions + ( i + 1 ) ) : i + 1 ] );
-			test.push( vertices[ ( ( i + 2 ) > divisions ) ? ( - divisions + ( i + 2 ) ) : i + 2 ] );
-			test.push( vertices[ 0 ] );	
-
-		}
-
-	}
-
-
-
-	// push the origin to the start of the array
-	
-	console.log("********************" + vertices.length);
-	for (var i = 0; i < vertices.length; i++) {
-		console.log(vertices[i]);
-	}
-
-	return test;
+	return vertices;
 
 }
+
 Tree.vertices = Tree.initModel();  // The model vertices - a class field
 // ------------------------------------------------------------------------------------
 
 var canvas;
 var gl;
 
-var tree;			// The array of stars
-var NTrees = 1;			// The number of stars
+var tree;			// The array of trees
+var NTrees = 1;			// The number of trees
+
 
 window.onload = function init() {
     canvas = document.getElementById( "gl-canvas" );
@@ -95,12 +79,14 @@ window.onload = function init() {
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
     tree = new Tree();
-
- //    // Set up the array of trees
- //    for (var n = 0; n < NTrees; n++) {
-	// 	trees.push( new Tree() );
-	// }
-
+    
+    var count = 0
+    canvas.addEventListener("mousedown", function(event){
+    		count++;
+    		console.log("count = " + count);
+    		Tree.addCount(count);
+    		render();
+    });
 
     //
     //  Configure WebGL
@@ -133,34 +119,29 @@ function render() {
 
     gl.clear(gl.COLOR_BUFFER_BIT);
     tree.render();
-    // gl.drawArrays(gl.TRIANGLE_FAN, 0, 5);
-    // Instance transform is sent and rendering done in an instance method
-  //   for (var n = 0; n < NTrees; n++) {
-		// trees[n].render();
-	// }
 }
 
 
-// Tests if the winding is anticlockwise (Right Hand Thumb rule)
-// returns true if vlist is in the correct order based on the 
-// right hand thumb rule
-function RHTw(vlist) {
-    var i = vlist.length;
-    for (var t = 0; t < 3; t++)
-    	console.log(vlist[t]);
-}
+// // Tests if the winding is anticlockwise (Right Hand Thumb rule)
+// // returns true if vlist is in the correct order based on the 
+// // right hand thumb rule
+// function RHTw(vlist) {
+//     var i = vlist.length;
+//     for (var t = 0; t < 3; t++)
+//     	console.log(vlist[t]);
+// }
 
-// Tests if the winding is anticlockwise (Right Hand Thumb rule)
-// returns true if vlist is in the correct order based on the 
-// right hand thumb rule
-function RHTwinding(vlist) {
-    var i = vlist.length;
-    // Argument is assumed an array of 3 3D points in order P0, P1, P2
-    // Calculate cross product (P1-P0)x(P2-P0)
-    var norm = cross ( subtract ( vlist[ i - 2 ], vlist[ i - 3 ] ),
-                        subtract( vlist[ i - 1 ], vlist[ i - 3 ] ) );
-    return norm[2] >= 0;
-}
+// // Tests if the winding is anticlockwise (Right Hand Thumb rule)
+// // returns true if vlist is in the correct order based on the 
+// // right hand thumb rule
+// function RHTwinding(vlist) {
+//     var i = vlist.length;
+//     // Argument is assumed an array of 3 3D points in order P0, P1, P2
+//     // Calculate cross product (P1-P0)x(P2-P0)
+//     var norm = cross ( subtract ( vlist[ i - 2 ], vlist[ i - 3 ] ),
+//                         subtract( vlist[ i - 1 ], vlist[ i - 3 ] ) );
+//     return norm[2] >= 0;
+// }
 
 /*
 	taken out of onload function 
@@ -220,3 +201,47 @@ function RHTwinding(vlist) {
 	// 	// console.log(rhtw);	
 	// }
 */
+
+
+
+//SUNDAY
+	// // var counter = divisions;
+	// // var t = [] ;
+	// // vertices = [0,1,2,3,4,5,6];
+	// var test = [];
+	// var isTrue = true;
+	// // var str;
+	// // var str2;
+	// for (var i = triangles; i > 0 ; i--) {
+
+	// 	test.push( vertices[ 0 ] );	
+	// 	test.push( vertices[ i ] ); 
+	// 	test.push( vertices[ ( i - 1 ) == 0 ? triangles : i - 1 ] );
+
+
+	// 	// if ( (i % 2) == 0 ) {
+	// 	// 	console.log("even " + i);
+	// 	// 	test.push( vertices[ 0 ] );	
+	// 	// 	test.push( vertices[ i ] ); 
+	// 	// 	test.push( vertices[ ( i - 1 ) == 0 ? triangles : i - 1 ] );
+			
+	// 	// } 
+	// 	// else {
+	// 	// 	console.log("odd " + i);
+
+	// 	// 	test.push( vertices[ 0 ] );	
+	// 	// 	test.push( vertices[ ( i - 1 ) == 0 ? triangles : i - 1 ] );
+	// 	// 	test.push( vertices[ i ] ); 
+
+	// 	// }
+
+	// }
+
+
+
+	// // push the origin to the start of the array
+	
+	// console.log("********************" + test.length);
+	// for (var i = 0; i < test.length; i++) {
+	// 	console.log(test[i]);
+	// }
