@@ -59,9 +59,9 @@ const up = vec3(0.0, 1.0, 0.0);
 function triags(a, b, c) {
     pointsArray.push(vertices[a]);
     colorsArray.push(vertexColors[b]); 
-    pointsArray.push(vertices[b]);
+    pointsArray.push(scale(0.25, vertices[b]));
     colorsArray.push(vertexColors[b]); 
-    pointsArray.push(vertices[c]);
+    pointsArray.push(scale(0.25, vertices[c]));
     colorsArray.push(vertexColors[b]); 
 }
 
@@ -122,10 +122,10 @@ window.onload = function init() {
     document.getElementById("Button2").onclick = function(){near *= 0.9; far *= 0.9;};
     document.getElementById("Button3").onclick = function(){radius *= 1.1;};
     document.getElementById("Button4").onclick = function(){radius *= 0.9;};
-    document.getElementById("Button5").onclick = function(){theta += dr;};
-    document.getElementById("Button6").onclick = function(){theta -= dr;};
-    document.getElementById("Button7").onclick = function(){phi += dr;};
-    document.getElementById("Button8").onclick = function(){phi -= dr;};
+    // document.getElementById("Button5").onclick = function(){theta += dr;};
+    // document.getElementById("Button6").onclick = function(){theta -= dr;};
+    // document.getElementById("Button7").onclick = function(){phi += dr;};
+    // document.getElementById("Button8").onclick = function(){phi -= dr;};
 // keys to change viewing position
 	window.onkeydown = function(event) {
 		var key = String.fromCharCode(event.keyCode);
@@ -174,4 +174,11 @@ function render() {
 	gl.drawArrays( gl.TRIANGLES, 0, numVertices );
 	// Remove unnecessary animation KWL 06/08/2015
 	// requestAnimFrame(render);
+}
+
+function state(){
+    console.log("near : " + near);
+    console.log("far : " + far);
+    console.log("radius : " + radius);
+    // console.log("near : " + near);
 }
