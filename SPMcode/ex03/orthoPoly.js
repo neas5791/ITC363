@@ -41,6 +41,7 @@ var radius = 1.0;
 var theta  = 0.0;
 var phi    = 0.0;
 var dr = 5.0 * Math.PI/180.0;
+var minTheta = 5.0*Math.PI/180.0;   // Closest approach to poles
 
 var left = -1.0;
 var right = 1.0;
