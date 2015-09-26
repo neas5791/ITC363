@@ -1,6 +1,6 @@
 
 var gl;             // the gl context object
-var n = 51;         // the number of divisions map out
+var n = 75;         // the number of divisions map out
 var nRows = n;      // used for array to store x co ordinates
 var nColumns = n;   // used for array to stor y co ordinate
 var unit = 2.0 / n; // as we map the plot from -1 < x < 1 && -1 < y < 1 our array starts at the exteme
@@ -21,9 +21,9 @@ var fColor;     // vertex shader link variable
 var near = -10; // initial position for near altered by increasing and decreasing the z buttons
 var far = 10;   // initial position for far  altered by increasing and decreasing the z buttons
 var radius = 6.0;   // initial position of camera
-var theta  = 0.0;   // initial camera polar position about the z axis
-var phi    = 0.0;   // initial camera polar position 
-var dr = 5.0 * Math.PI/180.0;   // the amount to alter theta and phi
+var theta  =  Math.PI/2.5 ;   // initial camera polar position about the z axis
+var phi    =  25.0 * Math.PI / 180.0 ;   // initial camera polar position 
+var dr     =   5.0 * Math.PI / 180.0 ;   // the amount to alter theta and phi
 
 
 /* **** COLOUR CONSTANTS **** */
@@ -72,10 +72,10 @@ window.onload = function init()
     for(var i=0; i<nRows-1; i++) {
         for(var j=0; j<nColumns-1;j++) {
             // push the vetices into the pointsArray in the correct order
-            pointsArray.push( vec4(unit*(i-25), data[i][j], unit*(j-25), 1.0));
-            pointsArray.push( vec4(unit*((i+1)-25), data[i+1][j], unit*(j-25), 1.0)); 
-            pointsArray.push( vec4(unit*((i+1)-25), data[i+1][j+1], unit*((j+1)-25), 1.0));
-            pointsArray.push( vec4(unit*(i-25), data[i][j+1], unit*((j+1)-25), 1.0) );
+            pointsArray.push( vec4(unit * ( i - ( n / 2 ) ), data[i][j], unit * ( j - ( n / 2 ) ), 1.0));
+            pointsArray.push( vec4(unit*((i+1)-( n / 2 )), data[i+1][j], unit*(j-( n / 2 )), 1.0)); 
+            pointsArray.push( vec4(unit*((i+1)-( n / 2 )), data[i+1][j+1], unit*((j+1)-( n / 2 )), 1.0));
+            pointsArray.push( vec4(unit*(i-( n / 2 )), data[i][j+1], unit*((j+1)-( n / 2 )), 1.0) );
         }
     }
 

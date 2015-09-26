@@ -1,15 +1,15 @@
 
 var gl;             // the gl context object
-var n = 50;         // the number of divisions map out
-var nRows = n;      // used for array to store x co ordinates
-var nColumns = n;   // used for array to stor y co ordinate
-var unit = 2.0 / n; // as we map the plot from -1 < x < 1 && -1 < y < 1 our array starts at the exteme
+
+var n;              // the number of divisions map out
+var nRows;          // used for array to store x co ordinates
+var nColumns;       // used for array to stor y co ordinate
+var unit;           // as we map the plot from -1 < x < 1 && -1 < y < 1 our array starts at the exteme
                     // of x = -1 and y = -1  effective unit constant is double the inverse of division
-
-
 
 var data = [];  // data is a two dimesnional array which store the z values for the respective 
                 // x and y inputs.
+
 var pointsArray = [];   // the array that will store the vertices information to be sent to buffer
 
 var xAxis;      // position in the array where the x Axis vertices start
@@ -26,7 +26,7 @@ var phi    =  25.0 * Math.PI / 180.0 ;   // initial camera polar position
 var dr     =   5.0 * Math.PI / 180.0 ;   // the amount to alter theta and phi
 
 
-/* **** COLOUR CONSTANTS **** */
+/* ************* COLOUR CONSTANTS ************* */
 const black = vec4(0.0, 0.0, 0.0, 1.0);
 const lgreen = vec4(0.37, 0.68, 0.53);
 const red = vec4(1.0, 0.0, 0.0, 1.0);
@@ -34,7 +34,7 @@ const blue = vec4(0.0, 1.0, 0.0, 1.0);
 const green = vec4(0.0, 0.0, 1.0, 1.0);
 const yellow = vec4(1.0, 1.0, 0.0, 1.0);
 const grey =  vec4(0.539, 0.539, 0.539, 1.0);
-
+/* ******************************************** */
 
 const at = vec3(0.0, 0.0, 0.0); // the center of the object
 const up = vec3(0.0, 1.0, 0.0); // the reference up direction
@@ -49,7 +49,6 @@ var modelViewMatrixLoc, projectionMatrixLoc;
 
 window.onload = function init()
 {
-    buildDataArray();
     var canvas = document.getElementById( "gl-canvas" );
     
     gl = WebGLUtils.setupWebGL( canvas );
@@ -66,56 +65,6 @@ window.onload = function init()
     gl.depthFunc(gl.LEQUAL);
     gl.enable(gl.POLYGON_OFFSET_FILL);
     gl.polygonOffset(1.0, 2.0);
-
-    // // vertex array of nRows*nColumns quadrilaterals 
-    // // (two triangles/quad) from data
-    
-    // for(var i=0; i<nRows-1; i++) {
-    //     for(var j=0; j<nColumns-1;j++) {
-    //         // push the vetices into the pointsArray in the correct order
-    //         pointsArray.push( vec4 ( unit * ( i - ( n / 2 ) )
-    //                                 , data[i][j]
-    //                                 , unit * ( j - ( n / 2 ) )
-    //                                 , 1.0));
-
-    //         pointsArray.push( vec4 ( unit * ( ( i + 1 ) - ( n / 2 ) )
-    //                                 , data[ i + 1 ][ j ]
-    //                                 , unit * ( j - ( n / 2 ) )
-    //                                 , 1.0)); 
-
-    //         pointsArray.push( vec4 ( unit * ( ( i + 1 ) - ( n / 2 ) )
-    //                                 , data[ i + 1 ][ j + 1 ]
-    //                                 , unit * ( ( j + 1 ) - ( n / 2 ) )
-    //                                 , 1.0));
-
-    //         pointsArray.push( vec4 ( unit * ( i - ( n / 2 ) )
-    //                                 , data[ i ][ j + 1 ]
-    //                                 , unit * ( ( j + 1 ) - ( n / 2 ) )
-    //                                 , 1.0) );
-    //     }
-    // }
-
-    buildPointArray();
-
-    // // Set marker for the end of the vertex data and 
-    // // start of the x axis vertices
-    // xAxis = pointsArray.length;
-
-    // pointsArray.push( vec4(-1.0, 0.0, 0.0, 1) )
-    // pointsArray.push( vec4( 1.0, 0.0, 0.0, 1) )
-
-    // // Set marker for the start of the y axis vertices
-    // yAxis = pointsArray.length;
-
-    // pointsArray.push( vec4( 0.0, -1.0, 0.0, 1) )
-    // pointsArray.push( vec4( 0.0,  1.0, 0.0, 1) )
-
-    // // Set marker for the start of the z axis vertices
-    // zAxis = pointsArray.length;
-
-    // pointsArray.push( vec4( 0.0, 0.0, -1.0, 1) )
-    // pointsArray.push( vec4( 0.0, 0.0,  1.0, 1) )
-
 
     //
     //  Load shaders and initialize attribute buffers
@@ -137,6 +86,10 @@ window.onload = function init()
     modelViewMatrixLoc = gl.getUniformLocation( program, "modelViewMatrix" );
     projectionMatrixLoc = gl.getUniformLocation( program, "projectionMatrix" );
 
+
+    // get the number vertices to display from the user interface html slider
+    setVerticesCount(document.getElementById("vertex-slider").value);
+
 // buttons for moving viewer and changing size 
 
     document.getElementById("Button1").onclick = function()  { near   *= 1.1 ; far    *= 1.1 ; render() ; };
@@ -153,22 +106,7 @@ window.onload = function init()
     document.getElementById("Button12").onclick = function() { ytop   *= 1.1 ; bottom *= 1.1 ; render() ; };
 
 
-    document.getElementById("vertex-slider").onchange = function(event) {
-        // set variable to slider value
-        n = event.target.value;
-
-        nRows = n;      // used for array to store x co ordinates
-        nColumns = n;   // used for array to stor y co ordinate
-        unit = 2.0 / n; // as we map the plot from -1 < x < 1 && -1 < y < 1 our array starts at the exteme
-                        // of x = -1 and y = -1  effective unit constant is double the inverse of division
-
-        buildDataArray();
-        buildPointArray();
-
-        render();
-
-        console.log("Number of Vertices is now " + n);
-    };
+    document.getElementById("vertex-slider").onchange = function(event) { setVerticesCount(event.target.value); render() ; };
 
        
     render();
@@ -176,50 +114,35 @@ window.onload = function init()
 }
 
 
-function render()
+/*
+ * Set the state variables of the mesh based on the number of vertices
+ *
+ * value    is the number of vertices to calculate in each of the x and y directions  
+*/
+function setVerticesCount(value)
 {
-    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    
-    var eye = vec3( radius*Math.sin(theta)*Math.cos(phi), 
-                    radius*Math.sin(theta)*Math.sin(phi),
-                    radius*Math.cos(theta));
+    console.log("In setVerticesCount()");
 
-    modelViewMatrix = lookAt( eye, at, up );
+    n = value;
+    nRows = n;      // used for array to store x co ordinates
+    nColumns = n;   // used for array to stor y co ordinate
+    unit = 2.0 / n; // as we map the plot from -1 < x < 1 && -1 < y < 1 our array starts at the exteme
+                    // of x = -1 and y = -1  effective unit constant is double the inverse of division
 
-    projectionMatrix = ortho( left, right, bottom, ytop, near, far );
+    buildDataArray();   // calculate and produce vertices data array
+    buildPointArray();  // arrange data array values into ordered vetices list
 
-    gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
-    gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
-    
-    // draw each quad as two filled yellow triangles
-    // and then as two black line loops
-    
-    for(var i=0; i<pointsArray.length - 6; i+=4) { 
-        gl.uniform4fv(fColor, flatten(yellow));
-        gl.drawArrays( gl.TRIANGLE_FAN, i, 4 );
-        
-        if (n > 50 )
-            gl.uniform4fv(fColor, flatten(grey));
-        else
-            gl.uniform4fv(fColor, flatten(black));
-
-        gl.drawArrays( gl.LINE_LOOP, i, 4 );
-    }
-
-    // Draw the axis markers 
-    // x axis red
-    gl.uniform4fv(fColor, flatten(red));
-    gl.drawArrays( gl.LINES, xAxis, 2);
-    // y axis green
-    gl.uniform4fv(fColor, flatten(green));
-    gl.drawArrays( gl.LINES, yAxis, 2);
-    // z axis blue
-    gl.uniform4fv(fColor, flatten(blue));
-    gl.drawArrays( gl.LINES, zAxis, 2);
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW); // push the new pointArray to the buffer
 }
 
-function buildDataArray() {
-    data = [];
+
+/*
+ * Creates the data[][] which contains the z vertex information for each paired set of x & y values
+*/
+function buildDataArray() 
+{
+    console.log("In buildDataArray()");
+    data = []; // create a new data array
 
     for( var i = 0; i < nRows; ++i ) {
         // initialize multi dimensional array by pushings and array
@@ -242,8 +165,15 @@ function buildDataArray() {
     }
 }
 
-function buildPointArray() {
-    pointsArray = [];
+
+/*
+ * Orders the verices information produced by the buildDataArray() into a list of 
+ * vec4 values such that quadrilateral line loops are formed when rendered.
+*/
+function buildPointArray() 
+{
+    console.log("In buildPointArray()");
+    pointsArray = []; // create a new pointsArray
     // vertex array of nRows*nColumns quadrilaterals 
     // (two triangles/quad) from data
     
@@ -290,6 +220,63 @@ function buildPointArray() {
 
     pointsArray.push( vec4( 0.0, 0.0, -1.0, 1) )
     pointsArray.push( vec4( 0.0, 0.0,  1.0, 1) )
+}
 
 
+/*
+ * Outputs state variable information to console
+*/
+function state()
+{
+    console.log("n: " + n);
+    console.log("nRows: " + nRows);
+    console.log("nColumns: " + nColumns);
+    console.log("unit: " + unit);
+}
+
+
+/*
+ * Renders the buffer to the webgl canvas
+*/
+function render()
+{
+    console.log("In render()");
+    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    
+    var eye = vec3( radius*Math.sin(theta)*Math.cos(phi), 
+                    radius*Math.sin(theta)*Math.sin(phi),
+                    radius*Math.cos(theta));
+
+    modelViewMatrix = lookAt( eye, at, up );
+
+    projectionMatrix = ortho( left, right, bottom, ytop, near, far );
+
+    gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
+    gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
+    
+    // draw each quad as two filled yellow triangles
+    // and then as two black line loops
+    for( var i = 0; i < pointsArray.length - 6; i += 4 ) { 
+        gl.uniform4fv(fColor, flatten(yellow));
+        gl.drawArrays( gl.TRIANGLE_FAN, i, 4 );
+
+        // change the LINE_LOOP colour based on the number of vertices displayed in the mesh
+        if (n > 50 )
+            gl.uniform4fv(fColor, flatten(grey));
+        else
+            gl.uniform4fv(fColor, flatten(black));
+
+        gl.drawArrays( gl.LINE_LOOP, i, 4 );
+    }
+
+    // Draw the axis markers 
+    // x axis red
+    gl.uniform4fv(fColor, flatten(red));
+    gl.drawArrays( gl.LINES, xAxis, 2);
+    // y axis green
+    gl.uniform4fv(fColor, flatten(green));
+    gl.drawArrays( gl.LINES, yAxis, 2);
+    // z axis blue
+    gl.uniform4fv(fColor, flatten(blue));
+    gl.drawArrays( gl.LINES, zAxis, 2);
 }
