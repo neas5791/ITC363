@@ -1,94 +1,3 @@
-// // A scene of a park
-// // Using a Tree class to represent each tree in the scene
-// // ----------------------------------------------------------------------------------------
-// // The Tree class
-// // The constructor function for a block
-// // Arguments: a vec3 location, a floating-point angle (degrees) and a vec3 scales
-// function Tree(location, scales) {
-//     var rs = scalem(scales);
-//     this.trs = mult(translate(location), rs);
-// }
-
-// // A Tree's render function
-// // Arguments:
-// //   offset - offset of vertices into current vertex attribute array
-// //   worldview - current worldview transformation
-// Tree.prototype.render = function(offset, worldview, colLoc) {
-//     gl.uniformMatrix4fv(mvLoc, false, flatten(mult(worldview, this.trs)));
-//     gl.uniform4fv(colLoc, flatten(vec4(0.0, 0.37, 0.0, 1.0)));
-//     gl.drawArrays(gl.TRIANGLE_FAN, offset, Tree.faces + 2);
-//     gl.uniform4fv(colLoc, flatten(vec4(0.398, 0.0, 0.0, 1.0)));
-//     gl.drawArrays(gl.TRIANGLES, offset + Tree.faces + 2, Tree.faces * 2 * 3);
-// };
-
-// // Block class fields
-// // The number of vertices to represent a tree (trunk 6 faces x 2 triangles - 18 vertices & cone 6 faces 
-// // in triangle_fan - 8 vertices   )
-// Tree.NV = 44;
-// Tree.faces = 6;
-// // Generator of model vertices - a class method
-// // Order is important - It should appear before it is used for Block.vertices
-// Tree.initModel = function() {
-//     var omega = (360.0 / Tree.faces) * (Math.PI / 180.0);
-//     // create the trunk (cylinder shape)
-//     var upper = []; 
-//     var lower = [];
-//     for ( var j = 0; j < Tree.faces ; j++ ){
-//         upper.push( vec3( Math.cos( j * omega ) / -6.0, Math.sin( j * omega ) / 6.0, 0.1 ) );
-//         lower.push( vec3( Math.cos( j * omega ) / -6.0, Math.sin( j * omega ) / 6.0, 0.0 ) );
-//     }
-
-//     var cylinder = upper.concat(lower);
-
-//     // A local array in which to develop the 36 vertices
-//     var vertices = [];
-
-//     // The 8 raw vertices of the canopy (cone shape)
-//     vertices.push( vec3( 0.0, 0.0, 0.5) );
-//     for (var i = 0; i < Tree.faces; i++){
-//         vertices[i + 1] = vec3( Math.cos( i * omega) / 2.0, Math.sin( i * omega) / 2.0, 0.1 ); // scale the rawVertices
-//     }
-//     vertices.push(vertices[1]);
-
-//     // A nested function generating the vertices for each face
-//     function quad(a, b, c, d) {
-//         // if abcd is an anticlockwise winding on a face
-//         // then abc and acd are anticlockwise windings on its triangles
-//         var indices = [a, b, c, a, c, d];
-
-//         for (var i = 0; i < indices.length; ++i) {
-//             vertices.push(cylinder[indices[i]]);
-//         }
-//     }
-
-//     // A nested function generating the cube's faces
-//     function doCube() {
-//         // Use anticlockwise windings
-//         quad(0,  6,  7, 1);
-//         quad(1,  7,  8, 2);
-//         quad(2,  8,  9, 3);
-//         quad(3,  9, 10, 4);
-//         quad(4, 10, 11, 5);
-//         quad(5, 11,  6, 0);
-//     }
-//     // console.log(vertices.length);
-//     doCube();
-
-//     // for (var j = 0; j < vertices.length; j++ ) {
-//     //     console.log(vertices[j]);
-//     // }
-//     // console.log(vertices.length);
-
-//     // the vertices array contains 8 vertices for the 
-//     // GL.TRIANGLE_FAN and 36 vertices for the GL.TRIANGLE
-//     return vertices;
-// }
-
-// // The model vertices - a class field
-// Tree.vertices = Tree.initModel();
-// //----------------------------------------------------------------------------
-
-
 
 var canvas;
 var gl;
@@ -108,10 +17,7 @@ var at = vec3(0.0, 0.0, 2.0);       // Looking at standing height in henge centr
 const up = vec3(0.0, 0.0, 1.0);     // VUP along world vertical
 
 const GRASS = vec4(0.4, 0.8, 0.2, 1.0); // Some colours
-const TREE = vec4(0.0, 0.37, 0.0, 1.0); // 005f00 - dark green
-const PATH = vec4(1.0, 0.53, 0.0, 1.0); // ff8700 - orange sort of colour
-const HUT_ROOF = vec4(0.0, 0.0, 0.0, 1.0); // 000000 - black 
-const HUT = vec4(0.0, 0.0, 1.0 , 1.0); // 0000ff - blue
+const PATH = vec4(1.0, 1.0, 0.0, 1.0); // ff8700  - orange(1,0.53,0) sort of colour
 
 //  Ground vertices for a 2000m x 2000m triangle fan
 var ground = [
@@ -144,17 +50,17 @@ var NVpath = 4;
 
 // Stonehenge parameters (lengths in metres)
 // const RINGRAD = 16.5;   // Radius of ring
-// const SSH = 4.1;        // Standing stone height (above ground)
-// const SSW = 2.1;        // Standing stone width
-// const SST = 1.1;        // Standing stone thickness
+const HUT_H = 10.0;        // Standing stone height (above ground)
+const HUT_W = 5.0;        // Standing stone width
+const HUT_T = 10.0;        // Standing stone thickness
 // const LSH = 0.8;        // Lintel stone height
 // const LSW = 3.2;        // Lintel stone width (aka length)
 // const LST = 1.0;        // Lintel stone thickness
-const NST = 300;         // Number of standing trees
+const NST = 200;         // Number of standing trees
 
 // Arrays of Trees objects representing the standing stones and the lintels
 var trees = [];
-
+var huts = [];
 
 window.onload = function init() {
     canvas = document.getElementById("gl-canvas");
@@ -164,7 +70,7 @@ window.onload = function init() {
     gl.viewport(0, 0, canvas.width, canvas.height);
     aspect =  canvas.width/canvas.height;
 
-    // Generate arrays of stone blocks
+    // Generate arrays of Trees
     doTrees();
 
     gl.clearColor(0.6, 0.8, 1.0, 1.0);      // Light blue background for sky
@@ -180,7 +86,7 @@ window.onload = function init() {
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
     // buffer needs to be big enough to keep grass, two paths, all the trees & a couple of huts
-    gl.bufferData(gl.ARRAY_BUFFER, sizeof['vec3']*(NVground+NVpath+NVpath+Tree.NV), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, sizeof['vec3']*(NVground+NVpath+NVpath+Tree.NV+Hut.NV), gl.STATIC_DRAW);
     // put the ground into the buffer
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(ground));
     // put a path into the buffer
@@ -189,6 +95,9 @@ window.onload = function init() {
     gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3']*(NVground+NVpath), flatten(path2));
     // put the trees into the buffer
     gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3']*(NVground+(2*NVpath)), flatten(Tree.vertices));
+    // put the trees into the buffer
+    gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3']*(NVground + ( 2 * NVpath ) + Tree.NV), flatten(Hut.vertices) );
+
 
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
@@ -274,83 +183,93 @@ function render() {
     gl.uniform4fv(colLoc, flatten(PATH));
     gl.drawArrays(gl.TRIANGLE_FAN, NVground, NVpath);
     gl.drawArrays(gl.TRIANGLE_FAN, NVground+NVpath, NVpath);
-    // Stones in model coordinates need modelview = worldview*TRS
-    // gl.uniform4fv(colLoc, flatten(TREE));
+    // Trees in model coordinates need modelview = worldview*TRS
     for (var i = 0; i < NST; i++) {
         trees[i].render(NVground+NVpath+NVpath, worldview, colLoc);
     }
+    for (var i = 0; i < 2; i++) {
+        huts[i].render(NVground+NVpath+NVpath+Tree.NV, worldview, colLoc);
+    }
+
 }
 
 function doTrees() {
     // Generate tree array
-    var scales = vec3( 2.1, 2.1, 20.0);   // scale the trees
+    var scales;// = vec3( 2.1, 2.1, 20.0);   // scale the trees
     var location;
-
-    var unique = uniqueLocations(300, 100);
+    var factor;
+    var unique = uniqueLocations(NST + 2, 100, 30, 15);
 
     for (var i = 0; i < NST; i++) {
-        location = unique[i];
+        location = unique[i+2];
+        factor = ((Math.random() * 1.0) - 3.0);
+        scales = vec3( factor , factor, ((Math.random() * 20.0) + 10.0));   // scale the trees ( 2.1 , 2.1, ((Math.random() * 20.0) + 10.0))
         trees[i] = new Tree(location, scales);
     }
-    console.log(trees.length);
+
+    for (var i = 0; i < 2; i++) {
+        location = unique[i];
+        factor = ((Math.random() * 1.0) - 3.0);
+        scales = vec3( HUT_T , HUT_W, HUT_H);   // scale the trees ( 2.1 , 2.1, ((Math.random() * 20.0) + 10.0))
+        huts[i] = new Hut(location, scales);        
+    }
 }
 
-/* Creating an array of unique vec3 positions
- * 
+/* 
+ * Creating an array of unique vec3 positions
+ * numberOfLocations - the quantity of unique locations required
+ * area - the square area to distribute the locations over 
+ * returns an array of vec3 positions
 */
-function uniqueLocations(numberOfLocations, area){
+function uniqueLocations(numberOfLocations, area, boundingX, boundingY){
     
     var unique = [];
 
-    function test(x){
-        if (x > -pathWidth*1.2 && x < pathWidth*1.2){
-            // console.log("found a false!");
+    function test(point, radius){
+
+        // check the path on the y axis
+        if (point[0] > -pathWidth * 0.9 && point[0] < pathWidth * 0.9)
+            return false;
+        // check the path on the x axis
+        if (point[1] > -pathWidth * 0.9 && point[1] < pathWidth * 0.9)
             return false;
 
-        }
+        // The check below is based on the  on the following definiton of a circle
+        // If you have the equation of the circle, simply plug in the x and y 
+        // from your point (x,y). After working out the problem, check to see 
+        // whether your added values are greater than, less than, or equal to 
+        // the r^2 value. If it is greater, then the point lies outside of the 
+        // circle.
+        var d = (point[0]*point[0] + point[1]*point[1]);
+        
+        if (d > radius*radius)
+            return false;
 
         return true;
     }
 
+    // build the array of uniqueness!
+    // random positions for placing objects within a circular region
     do {
-        var x = ( Math.random() * area ) - (area / 2);
-        var y = ( Math.random() * area ) - (area / 2);
+        var x = ( Math.random() * area*2 ) - (area );
+        var y = ( Math.random() * area*2 ) - (area );
         var z = 0;
         var v = vec3(x, y, z);
         if (unique.length == 0) {
             unique.push(v);
         }
-        else
-        {
-            if (test(x) && test(y))
+        else if (unique.length == 1) {
+            var u0 = unique[0];
+            var l = Math.sqrt( Math.pow(v[0] - u0[0],2) + Math.pow(v[1] - u0[1], 2)  );
+            if (l > 50)
+                unique.push(v);
+        }
+        else {
+            if (test(v,area))
                 if (unique.indexOf(v) < 0 )
                     unique.push(v);
         }
     } while (unique.length < numberOfLocations);
 
-    console.log(unique.length);
-
-    // for (var i = 0; i < numberOfLocations; i++){
-    //     var x = ( Math.random() * area ) - (area / 2);
-    //     var y = ( Math.random() * area ) - (area / 2);
-    //     var z = 0;
-    //     var v = vec3(x, y, z);
-    //     if (i == 0) {
-    //         unique.push(v);
-    //     }
-    //     else
-    //     {
-    //         if (test(x) && test(y))
-    //             if (unique.indexOf(v) < 0 )
-    //                 unique.push(v);
-    //             else
-    //                 i--;
-    //     }
-    // }
-
-
-
-    // for (var i = 0 ; i < unique.length; i++)
-    //     console.log(unique[i]);
     return unique;
 }

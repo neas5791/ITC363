@@ -13,9 +13,9 @@ function Tree(location, scales) {
 //   worldview - current worldview transformation
 Tree.prototype.render = function(offset, worldview, colLoc) {
     gl.uniformMatrix4fv(mvLoc, false, flatten(mult(worldview, this.trs)));
-    gl.uniform4fv(colLoc, flatten(vec4(0.0, 0.37, 0.0, 1.0)));
+    gl.uniform4fv(colLoc, flatten(Tree.GREEN));
     gl.drawArrays(gl.TRIANGLE_FAN, offset, Tree.faces + 2);
-    gl.uniform4fv(colLoc, flatten(vec4(0.398, 0.0, 0.0, 1.0)));
+    gl.uniform4fv(colLoc, flatten(Tree.BROWN));
     gl.drawArrays(gl.TRIANGLES, offset + Tree.faces + 2, Tree.faces * 2 * 3);
 };
 
@@ -24,6 +24,9 @@ Tree.prototype.render = function(offset, worldview, colLoc) {
 // in triangle_fan - 8 vertices   )
 Tree.NV = 44;
 Tree.faces = 6;
+// const Tree.TREE = vec4(0.0, 0.37, 0.0, 1.0); // 005f00 - dark green
+Tree.GREEN = vec4(0.0, 0.37, 0.0, 1.0);
+Tree.BROWN = vec4(0.398, 0.0, 0.0, 1.0);
 // Generator of model vertices - a class method
 // Order is important - It should appear before it is used for Block.vertices
 Tree.initModel = function() {
