@@ -47,7 +47,7 @@ var path2 = [
 
 var NVground = 4;   // Number of ground vertices
 var NVpath = 4;
-
+var Pathbuffer = 2;
 // Stonehenge parameters (lengths in metres)
 // const RINGRAD = 16.5;   // Radius of ring
 const HUT_H = 10.0;        // Standing stone height (above ground)
@@ -57,8 +57,9 @@ const HUT_T = 10.0;        // Standing stone thickness
 // const LSW = 3.2;        // Lintel stone width (aka length)
 // const LST = 1.0;        // Lintel stone thickness
 const NST = 200;         // Number of standing trees
-
+const NSH = 2;           // Number of standing huts
 // Arrays of Trees objects representing the standing stones and the lintels
+
 var trees = [];
 var huts = [];
 

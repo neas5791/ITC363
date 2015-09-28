@@ -24,6 +24,8 @@ Tree.prototype.render = function(offset, worldview, colLoc) {
 // in triangle_fan - 8 vertices   )
 Tree.NV = 44;
 Tree.faces = 6;
+Tree.buffer = 5;
+
 // const Tree.TREE = vec4(0.0, 0.37, 0.0, 1.0); // 005f00 - dark green
 Tree.GREEN = vec4(0.0, 0.37, 0.0, 1.0);
 Tree.BROWN = vec4(0.398, 0.0, 0.0, 1.0);
