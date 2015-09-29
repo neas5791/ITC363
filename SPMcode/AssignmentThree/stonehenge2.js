@@ -58,7 +58,7 @@ const AREA = 100;
 // const LSW = 3.2;        // Lintel stone width (aka length)
 // const LST = 1.0;        // Lintel stone thickness
 var NST = 200;         // Number of standing trees
-var NSH = 3;           // Number of standing huts
+var NSH = 2;           // Number of standing huts
 // Arrays of Trees objects representing the standing stones and the lintels
 
 var trees = [];
