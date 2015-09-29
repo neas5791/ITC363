@@ -229,10 +229,10 @@ function uniqueLocations(numberOfLocations, area, boundingX, boundingY){
     function test(point, radius){
 
         // check the path on the y axis
-        if (point[0] > -pathWidth * 0.9 && point[0] < pathWidth * 0.9)
+        if (point[0] > -pathWidth * 1.2 && point[0] < pathWidth * 1.2)
             return false;
         // check the path on the x axis
-        if (point[1] > -pathWidth * 0.9 && point[1] < pathWidth * 0.9)
+        if (point[1] > -pathWidth * 1.2 && point[1] < pathWidth * 1.2)
             return false;
 
         // The check below is based on the  on the following definiton of a circle
@@ -255,7 +255,17 @@ function uniqueLocations(numberOfLocations, area, boundingX, boundingY){
         var x = ( Math.random() * area*2 ) - (area );
         var y = ( Math.random() * area*2 ) - (area );
         var z = 0;
+
+        if ( x > -pathWidth * 1.2 && x < pathWidth * 1.2)
+            continue;
+        // check the path on the x axis
+        if ( y > -pathWidth * 1.2 && y < pathWidth * 1.2)
+            continue;
+
+
+
         var v = vec3(x, y, z);
+
         if (unique.length == 0) {
             unique.push(v);
         }
