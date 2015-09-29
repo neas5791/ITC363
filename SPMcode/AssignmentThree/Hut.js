@@ -26,7 +26,7 @@ Hut.prototype.render = function(offset, worldview, colLoc) {
 Hut.NV = 54;//42;//36
 Hut.NVroof = 6;
 Hut.faces = 6;
-Hut.buffer = 75;
+Hut.buffer = 30;
 
 Hut.BLACK = vec4(0.0, 0.0, 0.0, 1.0); // 000000 - black
 Hut.BLUE = vec4(0.0, 0.0, 1.0 , 1.0); // 0000ff - blue
@@ -79,7 +79,7 @@ Hut.initModel = function() {
         // 27 vertices
 
         quad(8,0,3,9);
-        console.log(vertices.length);
+        // console.log(vertices.length);
         // 33 vertices
 
         vertices.push(rawverts[1]); // triangle at end

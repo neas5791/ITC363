@@ -53,11 +53,12 @@ var Pathbuffer = 2;
 const HUT_H = 10.0;        // Standing stone height (above ground)
 const HUT_W = 5.0;        // Standing stone width
 const HUT_T = 10.0;        // Standing stone thickness
+const AREA = 100;
 // const LSH = 0.8;        // Lintel stone height
 // const LSW = 3.2;        // Lintel stone width (aka length)
 // const LST = 1.0;        // Lintel stone thickness
-const NST = 200;         // Number of standing trees
-const NSH = 2;           // Number of standing huts
+var NST = 200;         // Number of standing trees
+var NSH = 2;           // Number of standing huts
 // Arrays of Trees objects representing the standing stones and the lintels
 
 var trees = [];
@@ -72,7 +73,7 @@ window.onload = function init() {
     aspect =  canvas.width/canvas.height;
 
     // Generate arrays of Trees
-    doTrees();
+    createLandscape();
 
     gl.clearColor(0.6, 0.8, 1.0, 1.0);      // Light blue background for sky
     gl.enable(gl.DEPTH_TEST);
@@ -170,6 +171,8 @@ window.onload = function init() {
         render();
     };
 
+    // document.getElementById("tree-slider").onchange = function(event) { setNumberOfTrees(event.target.value); render() ; };
+    // document.getElementById("hut-slider").onchange = function(event) { setNumberOfHuts(event.target.value); render() ; };
     render();
 };
 
@@ -188,29 +191,50 @@ function render() {
     for (var i = 0; i < NST; i++) {
         trees[i].render(NVground+NVpath+NVpath, worldview, colLoc);
     }
-    for (var i = 0; i < 2; i++) {
+    for (var i = 0; i < NSH; i++) {
         huts[i].render(NVground+NVpath+NVpath+Tree.NV, worldview, colLoc);
     }
 
 }
 
-function doTrees() {
+function setNumberOfTrees(numberOfTrees){
+    NST = numberOfTrees;
+    if (NST > 50){
+        NHT = 2;
+        document.getElementById("hut-slider").value = 2;
+    }
+
+    createLandscape();
+}
+
+function setNumberOfHuts(numberOfHuts){
+    NSH = numberOfHuts;
+
+    createLandscape();
+}
+
+function createLandscape() {
     // Generate tree array
     var scales;// = vec3( 2.1, 2.1, 20.0);   // scale the trees
     var location;
     var factor;
-    var unique = uniqueLocations(NST + 2, 100, 30, 15);
+
+    var unique = uniqueLocations(NST + NSH, AREA, 30, 15);
+
+    console.log("Huts = " + NSH);
+    console.log("Trees = " + NST);
+    console.log("locations = " + unique.length);
 
     for (var i = 0; i < NST; i++) {
-        location = unique[i+2];
+        location = unique[i + NSH];
         factor = ((Math.random() * 1.0) - 3.0);
         scales = vec3( factor , factor, ((Math.random() * 20.0) + 10.0));   // scale the trees ( 2.1 , 2.1, ((Math.random() * 20.0) + 10.0))
         trees[i] = new Tree(location, scales);
     }
 
-    for (var i = 0; i < 2; i++) {
+    for (var i = 0; i < NSH; i++) {
         location = unique[i];
-        factor = ((Math.random() * 1.0) - 3.0);
+        // factor = ((Math.random() * 1.0) - 3.0);
         scales = vec3( HUT_T , HUT_W, HUT_H);   // scale the trees ( 2.1 , 2.1, ((Math.random() * 20.0) + 10.0))
         huts[i] = new Hut(location, scales);        
     }
@@ -225,6 +249,71 @@ function doTrees() {
 function uniqueLocations(numberOfLocations, area, boundingX, boundingY){
     
     var unique = [];
+
+    function hutTest(point){
+
+        // check the hut is not on the path
+        if ( point[0] > -1 * ( Hut.buffer + ( 1.2 * pathWidth ) ) && point[0] < ( Hut.buffer + ( 1.2 * pathWidth ) )) {
+            return false;
+        }
+        // check the hut is not on the path
+        if ( point[1] > -1 * ( Hut.buffer + ( -1.2 * pathWidth ) ) && point[1] < ( Hut.buffer + ( 1.2 * pathWidth ) )) {
+            return false;
+        }
+        // if it is the first hut skip rest of test
+        if (unique.length == 0) { return true; }
+
+        // check that the hut doesn't interfer with any other hut in the array
+        var testlength = unique.length < NSH ? unique.length : NSH;
+
+        for (var i = 0; i < testlength; i++){
+          
+            if ( inCircle( point, unique[i], Hut.buffer * 2) )  {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function treeTest(point){
+        // check tree not in location contained by hut
+        for (var i = 0; i < NSH; i++) {
+            if ( inCircle( point, unique[i], Hut.buffer * 1.8) )  {
+                return false;
+            }
+        }
+
+        // check tree not in location already containg tree
+        for (var i = NSH; i < unique.length; i++){
+            
+            if ( inCircle( point, unique[i], Tree.buffer) )  {
+                return false;
+            }
+
+            // // console.log(i);
+            // var origin = unique[i];
+
+            // var d = Math.sqrt( Math.pow( (point[0] - origin[0]) , 2) + Math.pow( (point[1] - origin[1] ) ,2) );
+
+            // if ( d < Tree.buffer)
+            //     return false;
+        }        
+
+        return true;
+    }
+
+    function inCircle(point, origin, radius){
+        var xp = point[0];
+        var yp = point[1];
+
+        var op = origin[0];
+        var yp = origin[1];
+
+        var d = Math.sqrt( Math.pow( ( xp - op ) , 2) + Math.pow( ( yp - op ) ,2) );
+        // console.log("in the circle");
+        return d <= radius;
+    }
 
     function test(point, radius){
 
@@ -243,44 +332,76 @@ function uniqueLocations(numberOfLocations, area, boundingX, boundingY){
         // circle.
         var d = (point[0]*point[0] + point[1]*point[1]);
         
-        if (d > radius*radius)
+        if ( d > radius*radius)
             return false;
 
         return true;
     }
 
+
     // build the array of uniqueness!
     // random positions for placing objects within a circular region
     do {
-        var x = ( Math.random() * area*2 ) - (area );
-        var y = ( Math.random() * area*2 ) - (area );
+        var x = ( Math.random() * area * 2 ) - (area );
+        var y = ( Math.random() * area * 2 ) - (area );
         var z = 0;
 
-        if ( x > -pathWidth * 1.2 && x < pathWidth * 1.2)
+// <<<<<<< HEAD
+//         if ( x > -pathWidth * 1.2 && x < pathWidth * 1.2)
+//             continue;
+//         // check the path on the x axis
+//         if ( y > -pathWidth * 1.2 && y < pathWidth * 1.2)
+//             continue;
+
+
+
+//         var v = vec3(x, y, z);
+
+//         if (unique.length == 0) {
+// =======
+        var tolerance = 1.2;
+        // check the path on the y axis
+        if ( x > -pathWidth * tolerance && x < pathWidth * tolerance)
             continue;
         // check the path on the x axis
-        if ( y > -pathWidth * 1.2 && y < pathWidth * 1.2)
+        if ( y > -pathWidth * tolerance && y < pathWidth * tolerance)
             continue;
 
-
-
+        // create a vec3
         var v = vec3(x, y, z);
 
-        if (unique.length == 0) {
+        // if first point check the hut fits
+        // push point to array
+        if (unique.length < 1 && hutTest(v)) {
+// >>>>>>> 6750327297a6f0b6fc736a97724399e923cec4e1
             unique.push(v);
+            showLocation("HUT", v);
         }
-        else if (unique.length == 1) {
-            var u0 = unique[0];
-            var l = Math.sqrt( Math.pow(v[0] - u0[0],2) + Math.pow(v[1] - u0[1], 2)  );
-            if (l > 50)
+        else if (unique.length < NSH) {
+            if ( hutTest(v) )
                 unique.push(v);
+                showLocation("HUT", v);
+            // var u0 = unique[0];
+            // var l = Math.sqrt( Math.pow(v[0] - u0[0],2) + Math.pow(v[1] - u0[1], 2)  );
+            // if (l > 50)
+            //     unique.push(v);
         }
         else {
-            if (test(v,area))
-                if (unique.indexOf(v) < 0 )
+            if (treeTest(v))
+                if (unique.indexOf(v) < 0 ){
                     unique.push(v);
+                    showLocation("TREE", v);
+                }
+
+            // if (test(v,area))
+                // if (unique.indexOf(v) < 0 )
+            //         unique.push(v);
         }
     } while (unique.length < numberOfLocations);
 
     return unique;
+}
+
+function showLocation(type, location){
+    console.log(type + ":" +location);
 }
