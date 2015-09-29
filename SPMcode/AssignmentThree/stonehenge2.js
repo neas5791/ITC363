@@ -53,11 +53,12 @@ var Pathbuffer = 2;
 const HUT_H = 10.0;        // Standing stone height (above ground)
 const HUT_W = 5.0;        // Standing stone width
 const HUT_T = 10.0;        // Standing stone thickness
+const AREA = 100;
 // const LSH = 0.8;        // Lintel stone height
 // const LSW = 3.2;        // Lintel stone width (aka length)
 // const LST = 1.0;        // Lintel stone thickness
 var NST = 200;         // Number of standing trees
-var NSH = 5;           // Number of standing huts
+var NSH = 3;           // Number of standing huts
 // Arrays of Trees objects representing the standing stones and the lintels
 
 var trees = [];
@@ -170,8 +171,8 @@ window.onload = function init() {
         render();
     };
 
-    document.getElementById("tree-slider").onchange = function(event) { setNumberOfTrees(event.target.value); render() ; };
-    document.getElementById("hut-slider").onchange = function(event) { setNumberOfHuts(event.target.value); render() ; };
+    // document.getElementById("tree-slider").onchange = function(event) { setNumberOfTrees(event.target.value); render() ; };
+    // document.getElementById("hut-slider").onchange = function(event) { setNumberOfHuts(event.target.value); render() ; };
     render();
 };
 
@@ -218,7 +219,7 @@ function createLandscape() {
     var location;
     var factor;
 
-    var unique = uniqueLocations(NST + NSH, 100, 30, 15);
+    var unique = uniqueLocations(NST + NSH, AREA, 30, 15);
 
     console.log("Huts = " + NSH);
     console.log("Trees = " + NST);
@@ -266,12 +267,10 @@ function uniqueLocations(numberOfLocations, area, boundingX, boundingY){
         var testlength = unique.length < NSH ? unique.length : NSH;
 
         for (var i = 0; i < testlength; i++){
-
-            var origin = unique[i];
-            var d = Math.sqrt( Math.pow(point[0] - origin[0], 2 ) + Math.pow(point[1] - origin[1], 2 ) );
-
-            if ( d < (Hut.buffer))
+          
+            if ( inCircle( point, unique[i], Hut.buffer * 2) )  {
                 return false;
+            }
         }
 
         return true;
@@ -280,43 +279,25 @@ function uniqueLocations(numberOfLocations, area, boundingX, boundingY){
     function treeTest(point){
         // check tree not in location contained by hut
         for (var i = 0; i < NSH; i++) {
-            // var p = point;
-            // var origin = unique[i];
-            // var radius = Hut.buffer;
-            if ( inCircle(point, unique[i], Hut.buffer) )  {
+            if ( inCircle( point, unique[i], Hut.buffer * 1.8) )  {
                 return false;
             }
-
-
-
-            // var origin = unique[i];
-            // console.log(i);
-            // console.log((point[0] + " : " + origin[0]));
-            // console.log((point[1] + " : " + origin[1]));
-            // console.log(point[0] - origin[0]);
-            // console.log(point[1] - origin[1]);
-            // console.log(Math.pow( (point[0] - origin[0]) , 2) )
-            // console.log(Math.pow( (point[1] - origin[1]) , 2) );
-            // console.log( Math.pow( (point[0] - origin[0]) , 2) + Math.pow( (point[1] - origin[1] ) , 2) );
-
-            // console.log(Math.sqrt( Math.pow( (point[0] - origin[0]) , 2) + Math.pow( (point[1] - origin[1] ) , 2) ));
-            // console.log(Hut.buffer);
-
-
-            // var d = Math.sqrt( Math.pow( (point[0] - origin[0]) , 2) + Math.pow( (point[1] - origin[1] ) , 2) );
-            
-            // if ( d < Hut.buffer)
-            //     return false;
         }
 
         // check tree not in location already containg tree
         for (var i = NSH; i < unique.length; i++){
-            // console.log(i);
-            var origin = unique[i];
-            var d = Math.sqrt( Math.pow( (point[0] - origin[0]) , 2) + Math.pow( (point[1] - origin[1] ) ,2) );
-
-            if ( d < Tree.buffer)
+            
+            if ( inCircle( point, unique[i], Tree.buffer) )  {
                 return false;
+            }
+
+            // // console.log(i);
+            // var origin = unique[i];
+
+            // var d = Math.sqrt( Math.pow( (point[0] - origin[0]) , 2) + Math.pow( (point[1] - origin[1] ) ,2) );
+
+            // if ( d < Tree.buffer)
+            //     return false;
         }        
 
         return true;
@@ -330,8 +311,8 @@ function uniqueLocations(numberOfLocations, area, boundingX, boundingY){
         var yp = origin[1];
 
         var d = Math.sqrt( Math.pow( ( xp - op ) , 2) + Math.pow( ( yp - op ) ,2) );
-        console.log("in the circle");
-        return d < radius;
+        // console.log("in the circle");
+        return d <= radius;
     }
 
     function test(point, radius){
@@ -357,11 +338,12 @@ function uniqueLocations(numberOfLocations, area, boundingX, boundingY){
         return true;
     }
 
+
     // build the array of uniqueness!
     // random positions for placing objects within a circular region
     do {
-        var x = ( Math.random() * area*2 ) - (area );
-        var y = ( Math.random() * area*2 ) - (area );
+        var x = ( Math.random() * area * 2 ) - (area );
+        var y = ( Math.random() * area * 2 ) - (area );
         var z = 0;
 
         var tolerance = 1.2;
@@ -372,17 +354,19 @@ function uniqueLocations(numberOfLocations, area, boundingX, boundingY){
         if ( y > -pathWidth * tolerance && y < pathWidth * tolerance)
             continue;
 
-
+        // create a vec3
         var v = vec3(x, y, z);
 
         // if first point check the hut fits
         // push point to array
-        if (unique.length == 0 && hutTest(v)) {
+        if (unique.length < 1 && hutTest(v)) {
             unique.push(v);
+            showLocation("HUT", v);
         }
         else if (unique.length < NSH) {
             if ( hutTest(v) )
                 unique.push(v);
+                showLocation("HUT", v);
             // var u0 = unique[0];
             // var l = Math.sqrt( Math.pow(v[0] - u0[0],2) + Math.pow(v[1] - u0[1], 2)  );
             // if (l > 50)
@@ -390,13 +374,20 @@ function uniqueLocations(numberOfLocations, area, boundingX, boundingY){
         }
         else {
             if (treeTest(v))
-                unique.push(v);
+                if (unique.indexOf(v) < 0 ){
+                    unique.push(v);
+                    showLocation("TREE", v);
+                }
 
             // if (test(v,area))
-            //     if (unique.indexOf(v) < 0 )
+                // if (unique.indexOf(v) < 0 )
             //         unique.push(v);
         }
     } while (unique.length < numberOfLocations);
 
     return unique;
+}
+
+function showLocation(type, location){
+    console.log(type + ":" +location);
 }
