@@ -1,247 +1,407 @@
-// ----------------------------------------------------------------------------------------
-// The Tree class
-// The constructor function for a tree
-// Arguments: a vec3 location, a floating-point angle (degrees) and a vec3 scales
-function Tree(){
-
-	var loc = vec3 ( 0, 0, 0);
-
-	// var loc = vec3( Math.random() * 2 - 1, 0, Math.random() * 2 - 1);
-	// var scale = ( Math.floor( Math.random() * 10 ) + 1 ) / 300;
-	// var scales = vec3( scale, 0.0, scale );
-}
-
-// A star's render function
-Tree.prototype.render = function() {
-	// gl.uniformMatrix4fv(matLoc, false, flatten(this.trs));
-	console.log("in Tree render function");
-	if (Tree.count > 0){
-		Tree.printVertices(Tree.count);
-		gl.drawArrays( gl.POINT, 0, Tree.count + 1 );
-	}
-};
-
-Tree.NV = 6;	// The number of vertices - a class field
-
-Tree.count = 0;
-Tree.addCount = function(newCount){
-	if (newCount < (Tree.NV + 1))
-		Tree.count = newCount;
-
-	console.log("Number of vertices to display is " + Tree.count);
-}
-
-Tree.printVertices = function(numberOfVetices){
-	for (var i = 0; i < numberOfVetices+1; i++)
-		console.log("Vertex " + i + ": " + Tree.vertices[i]);
-}
-
-Tree.initModel = function() {
-	var vertices = [];
-	var height = 1;
-	var radius = 5;
-	var triangles = 6;
-	var angle = 360.0 / triangles;
-	vertices.push( vec3( 0, 0, 0 ) );
-	// pushes all of the vertices to the array
-
-	// this loop creates the vertices on the circumfrence
-	for ( var i = 0; i <= triangles ; i++ ) {
-		var x = Math.cos( i * angle * Math.PI / 180) / 2;
-		var y = Math.sin( i * angle * Math.PI / 180) / 2;
-		vertices.push( vec3( x, y, 0) );
-		// console.log(vertices[i]);
-	}
-
-	// console.log("****************************");
-	// for (var i = 0; i < vertices.length; i++) {
-	// 	console.log(i + " : " + vertices[i]);	
-	// }
-
-	return vertices;
-
-}
-
-Tree.vertices = Tree.initModel();  // The model vertices - a class field
-// ------------------------------------------------------------------------------------
 
 var canvas;
 var gl;
 
-var tree;			// The array of trees
-var NTrees = 1;			// The number of trees
+var near = 1.0;     // near/far clipping in metres
+var far = 300;
+
+var fovy = 27.0;    // Vertical FoV to match standard 50mm lens with 35mm film
+var aspect;         // Aspect ratio set from canvas should match 35mm film
+
+var worldview, modelview, projection;   // Worldview, Modelview and projection matrices
+var mvLoc, projLoc;                     //   and their shader program locations
+var colLoc;                             // Colour shader program location
+
+var eye = vec3(0.0, -75.0, 2.0);    // Viewed from standing height, 75m along negative y-axis
+var at = vec3(0.0, 0.0, 2.0);       // Looking at standing height in henge centre
+const up = vec3(0.0, 0.0, 1.0);     // VUP along world vertical
+
+const GRASS = vec4(0.4, 0.8, 0.2, 1.0); // Some colours
+const PATH = vec4(1.0, 1.0, 0.0, 1.0);  // ff8700  - orange(1,0.53,0) sort of colour
+
+//  Ground vertices for a 2000m x 2000m triangle fan
+var ground = [
+    vec3( 1000.0, -1000.0, 0.0),
+    vec3( 1000.0,  1000.0, 0.0),
+    vec3(-1000.0,  1000.0, 0.0),
+    vec3(-1000.0, -1000.0, 0.0)
+];
+
+
+//  Path vertices through the grass area
+var pathWidth = 5.0;    // Path width
+
+// Path in the Y direction
+var path = [
+    vec3( pathWidth, -1000.0, 0.1),
+    vec3( pathWidth,  1000.0, 0.1),
+    vec3(-pathWidth,  1000.0, 0.1),
+    vec3(-pathWidth, -1000.0, 0.1),
+];
+
+// Path in the X direction
+var path2 = [
+    vec3( 1000.0, -pathWidth, 0.1),
+    vec3( 1000.0,  pathWidth, 0.1),
+    vec3(-1000.0,  pathWidth, 0.1),
+    vec3(-1000.0, -pathWidth, 0.1),
+];
+
+var NVground = 4;   // Number of vertices for ground
+var NVpath = 4;     // Number of vertices in a Path object
+var Pathbuffer = 2; // boundry allowance for the path, ie other
+                    // objects minimum distance to path
+
+// Turbo Town Park 
+const HUT_H = 10.0;         // Hut height (above ground)
+const HUT_W = 5.0;          // Hut width
+const HUT_T = 10.0;         // Hut thickness
+const AREA = 100.0;         // Area of Park
+
+var NST = 300;              // Number of standing trees
+var NSH = 5;                // Number of standing huts
+
+// Arrays of Trees objects representing the standing stones and the lintels
+var trees = [];
+var huts = [];
 
 
 window.onload = function init() {
-    canvas = document.getElementById( "gl-canvas" );
+    canvas = document.getElementById("gl-canvas");
+    gl = WebGLUtils.setupWebGL(canvas);
+    if (!gl) { alert("WebGL isn't available"); }
 
-    gl = WebGLUtils.setupWebGL( canvas );
-    if ( !gl ) { alert( "WebGL isn't available" ); }
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    aspect =  canvas.width/canvas.height;
 
-    tree = new Tree();
-    
-    var count = 0
-    canvas.addEventListener("mousedown", function(event){
-    		count++;
-    		console.log("count = " + count);
-    		Tree.addCount(count);
-    		render();
-    });
+    // // Generate arrays of Trees
+    // createLandscape();
+
+    gl.clearColor(0.6, 0.8, 1.0, 1.0);      // Light blue background for sky
+    gl.enable(gl.DEPTH_TEST);
 
     //
-    //  Configure WebGL
+    //  Load shaders and initialise attribute buffers
+    //  Uses a single buffer and a single vertex array
     //
-    gl.viewport( 0, 0, canvas.width, canvas.height );
-    gl.clearColor( 0.0, 0.0, 0.0, 1.0 );	// Black background for stars
+    var program = initShaders(gl, "vertex-shader", "fragment-shader");
+    gl.useProgram(program);
 
-    //  Load shaders and initialize attribute buffers
-    var program = initShaders( gl, "vertex-shader", "fragment-shader" );
-    gl.useProgram( program );
+    var vBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+    // buffer needs to be big enough to keep grass, two paths, all the trees & a couple of huts
+    gl.bufferData(gl.ARRAY_BUFFER, sizeof['vec3']*(NVground+NVpath+NVpath+Tree.NV+Hut.NV), gl.STATIC_DRAW);
+    // put the ground into the buffer
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(ground));
+    // put a path into the buffer
+    gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3']*NVground, flatten(path));
+    // put the second path into the buffer
+    gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3']*(NVground+NVpath), flatten(path2));
+    // put the trees into the buffer
+    gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3']*(NVground+(2*NVpath)), flatten(Tree.vertices));
+    // put the trees into the buffer
+    gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3']*(NVground + ( 2 * NVpath ) + Tree.NV), flatten(Hut.vertices) );
 
 
-    // Load the data into the GPU, using a class member of Star for the model data
-    var bufferId = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(Tree.vertices), gl.STATIC_DRAW);
+    var vPosition = gl.getAttribLocation(program, "vPosition");
+    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vPosition);
 
-    // Associate our shader variables with our data buffer
-    var vPosition = gl.getAttribLocation( program, "vPosition" );
-    gl.vertexAttribPointer( vPosition, 2, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vPosition );
+    mvLoc = gl.getUniformLocation(program, "modelView");
+    projLoc = gl.getUniformLocation(program, "projection");
+    colLoc = gl.getUniformLocation(program, "colour");
 
-	// get modelview's shader program location
-    // matLoc = gl.getUniformLocation(program, "modelview");
+    projection = perspective(fovy, aspect, near, far);
+    gl.uniformMatrix4fv(projLoc, false, flatten(projection));
+
+    // Event handlers
+    // Buttons to change fovy
+    document.getElementById("Button1").onclick = function() {
+        fovy += 6.0;
+        if (fovy > 45.0) {fovy = 45.0;}
+        projection = perspective(fovy, aspect, near, far);
+        gl.uniformMatrix4fv(projLoc, false, flatten(projection));
+        render();
+    };
+    document.getElementById("Button2").onclick = function() {
+        fovy -= 6.0;
+        if (fovy < 15.0) {fovy = 15.0;}
+        projection = perspective(fovy, aspect, near, far);
+        gl.uniformMatrix4fv(projLoc, false, flatten(projection));
+        render();
+    };
+
+
+    // Keys to change viewing position/direction
+    // Inefficient code arranged for readability
+    window.onkeydown = function(event) {
+        var key = String.fromCharCode(event.keyCode);
+        var forev = subtract(at, eye);              // current view forward vector
+        var foreLen = length(forev);                // current view forward vector length
+        var fore = normalize(forev);                // current view forward direction
+        var right = normalize(cross(fore, up));     // current horizontal right direction
+        var ddir = 2.0*Math.PI/180.0;               // incremental view angle change
+        var dat;                                    // incremental at change
+        switch( key ) {
+          case 'W':
+            at = add(at, fore);
+            eye = add(eye, fore);
+            break;
+          case 'S':
+            at = subtract(at, fore);
+            eye = subtract(eye, fore);
+            break;
+          case 'A':
+            at = subtract(at, right);
+            eye = subtract(eye, right);
+            break;
+          case 'D':
+            at = add(at, right);
+            eye = add(eye, right);
+            break;
+          // The following calculate the displacement of 'at' for +/- 2 degree view angle change
+          //   around the horizontal circle centred at 'eye', then apply it to 'at'
+          case 'Q':
+            dat = subtract(scale(foreLen*(Math.cos(ddir) - 1.0), fore), scale(foreLen*Math.sin(ddir), right));
+            at = add(at, dat);
+            break;
+          case 'E':
+            dat = add(scale(foreLen*(Math.cos(ddir) - 1.0), fore), scale(foreLen*Math.sin(ddir), right));
+            at = add(at, dat);
+            break;
+        }
+        render();
+    };
+
+    document.getElementById("tree-slider").onchange = function(event) { setNumberOfTrees(event.target.value); render() ; };
+    document.getElementById("hut-slider").onchange = function(event) { setNumberOfHuts(event.target.value); render() ; };
+
+    // Generate arrays of Trees
+    createLandscape();
 
     render();
-}
+};
 
 function render() {
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    tree.render();
+    worldview = lookAt(eye, at, up);
+    // Ground in world coordinates needs modelview = worldview
+    gl.uniformMatrix4fv(mvLoc, false, flatten(worldview));
+    gl.uniform4fv(colLoc, flatten(GRASS));
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, NVground);
+    gl.uniform4fv(colLoc, flatten(PATH));
+    gl.drawArrays(gl.TRIANGLE_FAN, NVground, NVpath);
+    gl.drawArrays(gl.TRIANGLE_FAN, NVground+NVpath, NVpath);
+    // Trees in model coordinates need modelview = worldview*TRS
+    for (var i = NSH; i < NST; i++) {
+        trees[i].render(NVground+NVpath+NVpath, worldview, colLoc);
+    }
+    for (var i = 0; i < NSH; i++) {
+        huts[i].render(NVground+NVpath+NVpath+Tree.NV, worldview, colLoc);
+    }
+
+}
+
+function createLandscape() {
+    // Generate tree array
+    var scales;// = vec3( 2.1, 2.1, 20.0);   // scale the trees
+    var location;
+    var factor;
+
+    // console.log(NST + NSH);
+    var nLocations = NST + NSH;
+    // console.log(NST);
+    // console.log(NSH);
+    // console.log(NST+NSH);
+    // console.log(nLocations);
+    var unique = uniqueLocations( nLocations, AREA);
+
+    showState();
+    console.log("locations = " + unique.length);
+
+    for (var i = NSH; i < NST; i++) {
+        location = unique[i + 0];
+        factor = ((Math.random() * 1.0) - 3.0);
+        scales = vec3( factor , factor, ((Math.random() * 20.0) + 10.0));   // scale the trees ( 2.1 , 2.1, ((Math.random() * 20.0) + 10.0))
+        trees[i] = new Tree(location, scales);
+    }
+
+    for (var i = 0; i < NSH; i++) {
+        location = unique[i];
+        // factor = ((Math.random() * 1.0) - 3.0);
+        scales = vec3( HUT_T , HUT_W, HUT_H);   // scale the trees ( 2.1 , 2.1, ((Math.random() * 20.0) + 10.0))
+        huts[i] = new Hut(location, scales);        
+    }
+}
+
+/* 
+ * Creating an array of unique vec3 positions
+ * numberOfLocations - the quantity of unique locations required
+ * area - the square area to distribute the locations over 
+ * returns an array of vec3 positions
+*/
+function uniqueLocations(numberOfLocations, area){
+    
+    var unique = []; // Array of locations to be returned
+
+    /*
+     * Test that the location is fit for a Hut object
+     * Returns true is location does not breach conditions 
+     * i.e. the location doesn't cause objects to inhabit the same space
+    */
+    function hutTest(point){
+
+        // check the hut is not on the path
+        if ( point[0] > -1 * ( Hut.buffer + ( 1.2 * pathWidth ) ) && point[0] < ( Hut.buffer + ( 1.2 * pathWidth ) )) {
+            return false;
+        }
+        // check the hut is not on the path
+        if ( point[1] > -1 * ( Hut.buffer + ( -1.2 * pathWidth ) ) && point[1] < ( Hut.buffer + ( 1.2 * pathWidth ) )) {
+            return false;
+        }
+        // if it is the first hut skip rest of test
+        if (unique.length == 0) { return true; }
+
+        // check that the hut doesn't interfer with any other hut in the array
+        var testlength = unique.length < NSH ? unique.length : NSH;
+
+        for (var i = 0; i < testlength; i++){
+            if ( inCircle( point, unique[i], Hut.buffer) )  {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /*
+     * Test that the location is fit for a Tree object
+     * Returns true is location does not breach conditions 
+     * i.e. the location doesn't cause objects to inhabit the same space
+    */
+    function treeTest(point){
+        // check tree not in location contained by hut
+        for (var i = 0; i < NSH; i++) {
+            if ( inCircle( point, unique[i], Hut.buffer) )  {
+                return false;
+            }
+        }
+        // check tree not in location already containg tree
+        for (var i = NSH; i < unique.length; i++){
+            
+            if ( inCircle( point, unique[i], Tree.buffer) )  {
+                return false;
+            }
+        }        
+        return true;
+    }
+
+
+    /*
+     * Test if a point is inside a given area about an origin
+     * point is the point to test
+     * origin is the centre point of our generated area 
+     * radius of the circle generating the area 
+     * returns true if point is within the area about the origin
+    */
+    function inCircle(point, origin, radius){
+        // This check is based on the following definiton of a circle
+        // If you have the equation of the circle, simply plug in the x and y 
+        // from your point (xp,yp). After working out the problem, check to see 
+        // whether your added values are greater than, less than, or equal to 
+        // the r^2 value. If it is greater, then the point lies outside of the 
+        // circle.
+
+        var xp = point[0];
+        var yp = point[1];
+
+        var xo = origin[0];
+        var yo = origin[1];
+
+        var d = Math.sqrt( Math.pow( ( xp - xo ) , 2) + Math.pow( ( yp - yo ) ,2) );
+        // console.log("in the circle");
+        return d <= radius;
+    }
+
+    // build the array of uniqueness!
+    // random positions for placing objects within a circular region
+    do {
+        var x = ( Math.random() * area * 2 ) - (area );
+        var y = ( Math.random() * area * 2 ) - (area );
+        var z = 0;
+
+        var tolerance = 1.2;
+        // check the point is not on path
+        if ( x > -pathWidth * tolerance && x < pathWidth * tolerance)
+            continue;
+        // check the point is not on path
+        if ( y > -pathWidth * tolerance && y < pathWidth * tolerance)
+            continue;
+
+        // create a vec3 point
+        var v = vec3(x, y, z);
+
+        // if first point check the hut fits
+        // push point to array
+        if (unique.length < 1 && hutTest(v)) {
+            unique.push(v);
+            // showLocation("HUT", v);
+        }
+        else if (unique.length < NSH) {
+            if ( hutTest(v) )
+                unique.push(v);
+                // showLocation("HUT", v);
+        }
+        else {
+            // test that the tree point doesn't encroach
+            if (treeTest(v))
+                if (unique.indexOf(v) < 0 ) {
+                    unique.push(v);
+                    // showLocation("TREE", v);
+                }
+        }
+        console.log(unique.length + ":" + numberOfLocations);
+    } while (unique.length < numberOfLocations);
+
+    return unique;
 }
 
 
-// // Tests if the winding is anticlockwise (Right Hand Thumb rule)
-// // returns true if vlist is in the correct order based on the 
-// // right hand thumb rule
-// function RHTw(vlist) {
-//     var i = vlist.length;
-//     for (var t = 0; t < 3; t++)
-//     	console.log(vlist[t]);
-// }
 
-// // Tests if the winding is anticlockwise (Right Hand Thumb rule)
-// // returns true if vlist is in the correct order based on the 
-// // right hand thumb rule
-// function RHTwinding(vlist) {
-//     var i = vlist.length;
-//     // Argument is assumed an array of 3 3D points in order P0, P1, P2
-//     // Calculate cross product (P1-P0)x(P2-P0)
-//     var norm = cross ( subtract ( vlist[ i - 2 ], vlist[ i - 3 ] ),
-//                         subtract( vlist[ i - 1 ], vlist[ i - 3 ] ) );
-//     return norm[2] >= 0;
-// }
-
-/*
-	taken out of onload function 
-	// var vertices = [];
-	// var height = 8;
-	// var radius = 5;
-	// var divisions = 6;
-	// vertices.push( vec3( 0, height, 0 ) );
-	// // pushes all of the vertices to the array
-	// for ( var i = 1; i <= divisions; i++ ) {
-	// 	var x = Math.cos( i * ( 360 / divisions ) * Math.PI / 180) * radius;
-	// 	var z = Math.sin( i * ( 360 / divisions ) * Math.PI / 180) * radius;
-	// 	vertices.push( vec3( x, 0, z) );
-	// 	// console.log( vertices[ i - 1 ] );
-	// }
-	// console.log(vertices.length);
-
-
-	// var counter = divisions;
-	// var t = [] ;
-	// // vertices = [0,1,2,3,4,5,6];
-	// test = [];
-	// var isTrue = true;
-	// // var str;
-	// // var str2;
-	// for (var i = 0; i < divisions ; i++) {
-
-
-	// 	if ( (i % 2) == 0 ) {
-	// 		console.log("even " + i);
-
-	// 		test.push( vertices[ ( ( i + 1 ) > divisions ) ? ( - divisions + ( i + 1 ) ) : i + 1 ] );
-	// 		test.push( vertices[ 0 ] );	
-	// 		test.push( vertices[ ( ( i + 2 ) > divisions ) ? ( - divisions + ( i + 2 ) ) : i + 2 ] );
-			
-	// 	} 
-	// 	else {
-	// 		console.log("odd " + i);
-
-	// 		test.push( vertices[ ( ( i + 1 ) > divisions ) ? ( - divisions + ( i + 1 ) ) : i + 1 ] );
-	// 		test.push( vertices[ ( ( i + 2 ) > divisions ) ? ( - divisions + ( i + 2 ) ) : i + 2 ] );
-	// 		test.push( vertices[ 0 ] );	
-
-	// 	}
-
-	// 	if ( test.length >= 2 ){
-	// 		t = test.slice(-3, test.length);
-	// 		str = i + " : ";
-	// 		// str2 = RHTwinding(t) ? "TRUE" : "FALSE";
-	// 		// console.log(str + str2);
-	// 		RHTw(t);
-	// 		console.log( RHTwinding(t) ? "TRUE" : "FALSE" );
-	// 		// console.log(t);
-	// 	}
-	// 	t = [];
-	// 	// var rhtw = RHTwinding(test.slice(-3))?"TRUE":"FALSE";
-	// 	// console.log(rhtw);	
-	// }
-*/
+function setNumberOfTrees(numberOfTrees){
+    NST = parseInt(numberOfTrees);
+    // if (NST > 50 && NSH > 3){
+    //     NSH = 2;
+    //     document.getElementById("hut-slider").value = NSH;
+    // }
+    huts = [];  // re initialize the array
+    trees = []; // re initialize the array
+    createLandscape(); // create a new landscape
+}
 
 
 
-//SUNDAY
-	// // var counter = divisions;
-	// // var t = [] ;
-	// // vertices = [0,1,2,3,4,5,6];
-	// var test = [];
-	// var isTrue = true;
-	// // var str;
-	// // var str2;
-	// for (var i = triangles; i > 0 ; i--) {
+function setNumberOfHuts(numberOfHuts){
+    console.log("setNumberOfHuts("+ numberOfHuts + ")");
+    NSH = parseInt(numberOfHuts);
+    // if (NSH > 5 && NST > 50){
+    //     NST = 50;
+    //     // document.getElementById("tree-slider").value = NST;
+    // }
 
-	// 	test.push( vertices[ 0 ] );	
-	// 	test.push( vertices[ i ] ); 
-	// 	test.push( vertices[ ( i - 1 ) == 0 ? triangles : i - 1 ] );
-
-
-	// 	// if ( (i % 2) == 0 ) {
-	// 	// 	console.log("even " + i);
-	// 	// 	test.push( vertices[ 0 ] );	
-	// 	// 	test.push( vertices[ i ] ); 
-	// 	// 	test.push( vertices[ ( i - 1 ) == 0 ? triangles : i - 1 ] );
-			
-	// 	// } 
-	// 	// else {
-	// 	// 	console.log("odd " + i);
-
-	// 	// 	test.push( vertices[ 0 ] );	
-	// 	// 	test.push( vertices[ ( i - 1 ) == 0 ? triangles : i - 1 ] );
-	// 	// 	test.push( vertices[ i ] ); 
-
-	// 	// }
-
-	// }
+    huts = [];  // re initialize the array
+    trees = []; // re initialize the array
+    createLandscape();
+}
 
 
 
-	// // push the origin to the start of the array
-	
-	// console.log("********************" + test.length);
-	// for (var i = 0; i < test.length; i++) {
-	// 	console.log(test[i]);
-	// }
+function showLocation(type, location){
+    console.log(type + ":" +location);
+}
+
+function showState(){
+    console.log("Huts = " + NSH);
+    console.log("Trees = " + NST);
+    
+}

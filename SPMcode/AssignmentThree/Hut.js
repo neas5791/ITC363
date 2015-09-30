@@ -11,6 +11,7 @@ function Hut(location, scales) {
 // Arguments:
 //   offset - offset of vertices into current vertex attribute array
 //   worldview - current worldview transformation
+//   colLoc - the colour buffer 
 Hut.prototype.render = function(offset, worldview, colLoc) {
     gl.uniformMatrix4fv(mvLoc, false, flatten(mult(worldview, this.trs)));
     gl.uniform4fv(colLoc, flatten(Hut.BLUE));
@@ -20,10 +21,10 @@ Hut.prototype.render = function(offset, worldview, colLoc) {
     gl.drawArrays(gl.TRIANGLES, offset + Hut.NV - 18, 18);
 };
 
-// Block class fields
-// The number of vertices to represent a tree (trunk 6 faces x 2 triangles - 18 vertices & cone 6 faces 
-// in triangle_fan - 8 vertices   )
-Hut.NV = 54;//42;//36
+// Hut class fields
+// The number of vertices to represent a hut (cube 6 faces x 2 triangles - 18 vertices & Roof 4 faces 
+// in triangles - 8 vertices   )
+Hut.NV = 54; 
 Hut.NVroof = 6;
 Hut.faces = 6;
 Hut.buffer = 20;
