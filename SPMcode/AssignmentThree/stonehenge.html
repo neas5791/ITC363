@@ -39,17 +39,23 @@ main()
   <li>Q and E swing the view direction respectively left and right in 2 degree increments, without changing the eye position.</li>
 </ul>
 <p>Button interaction:<p>
-<p>Just for fun I have included adjustment of the vertical field of view, initially set at 27 degrees, corresponding roughly to a standard 50mm SLR lens. It can be increased or decreased in steps of 6 degrees to a maximum of 45 degrees (approx 30mm SLR lens) and a minimum of 15 degrees (approx 90mm SLR lens).</p>
+<p>Ken's "Just For Fun" buttons are still included for the adjustment of the vertical field of view, initially set at 27 degrees, corresponding roughly to a standard 50mm SLR lens. It can be increased or decreased in steps of 6 degrees to a maximum of 45 degrees (approx 30mm SLR lens) and a minimum of 15 degrees (approx 90mm SLR lens).</p>
+<p>Slider interaction:<p>
+<p>The sliders allow for dynamic adjustment to the number of objects (trees and huts)
+	displayed on the canvas. These are initially set to 300 Trees and 5 Huts distributed randomly throughout a 100 square meter area.</p>
+
 <p><button id="Button1">Increase FoVY</button> <button id="Button2">Decrease FoVY</button></p>
 
 <canvas id="gl-canvas" width="768" height="512">
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
-<!-- <div>
-	<input id="tree-slider" type="range" min="20" max="100" step="10" value="50"/>
+<div>
+	<p> Trees 
+	<input id="tree-slider" type="range" min="25" max="350" step="25" value="300"/></p>
 </div>
 <div>
-	<input id="hut-slider" type="range" min="2" max="10" step="1" value="5"/>
-</div> -->
+	<p> Huts 
+	<input id="hut-slider" type="range" min="2" max="10" step="1" value="5"/></p>
+</div>
 </body>
 </html>

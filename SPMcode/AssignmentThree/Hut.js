@@ -26,7 +26,7 @@ Hut.prototype.render = function(offset, worldview, colLoc) {
 Hut.NV = 54;//42;//36
 Hut.NVroof = 6;
 Hut.faces = 6;
-Hut.buffer = 30;
+Hut.buffer = 20;
 
 Hut.BLACK = vec4(0.0, 0.0, 0.0, 1.0); // 000000 - black
 Hut.BLUE = vec4(0.0, 0.0, 1.0 , 1.0); // 0000ff - blue
