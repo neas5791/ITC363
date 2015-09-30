@@ -1,3 +1,7 @@
+// ITC363 Assignment 3
+// Task 2: 3D Park Scene
+// Sean Matkovich
+// ID: 11187033
 
 var canvas;
 var gl;
@@ -32,19 +36,25 @@ var ground = [
 var pathWidth = 5.0;    // Path width
 
 // Path in the Y direction
+// I am cheating a little here by lifting 
+// the path slightly above the ground
 var path = [
-    vec3( pathWidth, -1000.0, 0.1),
-    vec3( pathWidth,  1000.0, 0.1),
-    vec3(-pathWidth,  1000.0, 0.1),
-    vec3(-pathWidth, -1000.0, 0.1),
+    vec3( pathWidth, -1000.0, 0.01),
+    vec3( pathWidth,  1000.0, 0.01),
+    vec3(-pathWidth,  1000.0, 0.01),
+    vec3(-pathWidth, -1000.0, 0.01),
 ];
 
+// I could have, on second thoughts maybe
+// I should have used a rotation transformation 
+// for the second path object hmmmmm????
+// 
 // Path in the X direction
 var path2 = [
-    vec3( 1000.0, -pathWidth, 0.1),
-    vec3( 1000.0,  pathWidth, 0.1),
-    vec3(-1000.0,  pathWidth, 0.1),
-    vec3(-1000.0, -pathWidth, 0.1),
+    vec3( 1000.0, -pathWidth, 0.01),
+    vec3( 1000.0,  pathWidth, 0.01),
+    vec3(-1000.0,  pathWidth, 0.01),
+    vec3(-1000.0, -pathWidth, 0.01),
 ];
 
 var NVground = 4;   // Number of vertices for ground
@@ -52,17 +62,19 @@ var NVpath = 4;     // Number of vertices in a Path object
 var Pathbuffer = 2; // boundry allowance for the path, ie other
                     // objects minimum distance to path
 
-// Turbo Town Park 
+// Turbo Town Park standards
 const HUT_H = 10.0;         // Hut height (above ground)
 const HUT_W = 5.0;          // Hut width
 const HUT_T = 10.0;         // Hut thickness
 const AREA = 100.0;         // Area of Park
 
+// variable object counts
 var NST = 300;              // Number of standing trees
 var NSH = 5;                // Number of standing huts
 
-// Arrays of Trees objects representing the standing stones and the lintels
+// Array of Trees
 var trees = [];
+// Array of Huts
 var huts = [];
 
 
@@ -73,9 +85,6 @@ window.onload = function init() {
 
     gl.viewport(0, 0, canvas.width, canvas.height);
     aspect =  canvas.width/canvas.height;
-
-    // // Generate arrays of Trees
-    // createLandscape();
 
     gl.clearColor(0.6, 0.8, 1.0, 1.0);      // Light blue background for sky
     gl.enable(gl.DEPTH_TEST);
@@ -90,27 +99,44 @@ window.onload = function init() {
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
     // buffer needs to be big enough to keep grass, two paths, all the trees & a couple of huts
-    gl.bufferData(gl.ARRAY_BUFFER, sizeof['vec3']*(NVground+NVpath+NVpath+Tree.NV+Hut.NV), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, 
+                    sizeof['vec3'] * ( NVground + NVpath + NVpath + Tree.NV + Hut.NV ),
+                    gl.STATIC_DRAW
+                    );
     // put the ground into the buffer
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(ground));
     // put a path into the buffer
-    gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3']*NVground, flatten(path));
+    gl.bufferSubData(gl.ARRAY_BUFFER, 
+                    sizeof['vec3'] * NVground, 
+                    flatten(path) 
+                    );
     // put the second path into the buffer
-    gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3']*(NVground+NVpath), flatten(path2));
+    gl.bufferSubData(gl.ARRAY_BUFFER, 
+                    sizeof['vec3'] * ( NVground + NVpath ), 
+                    flatten(path2)
+                    );
     // put the trees into the buffer
-    gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3']*(NVground+(2*NVpath)), flatten(Tree.vertices));
+    gl.bufferSubData(gl.ARRAY_BUFFER, 
+                    sizeof['vec3'] * ( NVground + ( 2 * NVpath ) ), 
+                    flatten(Tree.vertices)
+                    );
     // put the trees into the buffer
-    gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec3']*(NVground + ( 2 * NVpath ) + Tree.NV), flatten(Hut.vertices) );
+    gl.bufferSubData(gl.ARRAY_BUFFER, 
+                    sizeof['vec3'] * ( NVground + ( 2 * NVpath ) + Tree.NV ), 
+                    flatten(Hut.vertices) 
+                    );
 
-
+    // set up the vertex position shader
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
 
+    // link to shader
     mvLoc = gl.getUniformLocation(program, "modelView");
     projLoc = gl.getUniformLocation(program, "projection");
     colLoc = gl.getUniformLocation(program, "colour");
 
+    // set up projection 
     projection = perspective(fovy, aspect, near, far);
     gl.uniformMatrix4fv(projLoc, false, flatten(projection));
 
@@ -172,24 +198,31 @@ window.onload = function init() {
         }
         render();
     };
-
+    // slider event handlers
     document.getElementById("tree-slider").onchange = function(event) { setNumberOfTrees(event.target.value); render() ; };
     document.getElementById("hut-slider").onchange = function(event) { setNumberOfHuts(event.target.value); render() ; };
 
-    // Generate arrays of Trees
+    // Generate the landscape i.e. the tree and hut arrays
     createLandscape();
 
     render();
 };
 
+
+
+/*
+ * Render the scene
+ */
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     worldview = lookAt(eye, at, up);
     // Ground in world coordinates needs modelview = worldview
     gl.uniformMatrix4fv(mvLoc, false, flatten(worldview));
+    // colour the grass green
     gl.uniform4fv(colLoc, flatten(GRASS));
     gl.drawArrays(gl.TRIANGLE_FAN, 0, NVground);
+    // colour the yellow brick road 
     gl.uniform4fv(colLoc, flatten(PATH));
     gl.drawArrays(gl.TRIANGLE_FAN, NVground, NVpath);
     gl.drawArrays(gl.TRIANGLE_FAN, NVground+NVpath, NVpath);
@@ -197,36 +230,39 @@ function render() {
     for (var i = NSH; i < NST; i++) {
         trees[i].render(NVground+NVpath+NVpath, worldview, colLoc);
     }
+    // Huts in model coordinates need modelview = worldview*TRS 
     for (var i = 0; i < NSH; i++) {
         huts[i].render(NVground+NVpath+NVpath+Tree.NV, worldview, colLoc);
     }
 
 }
 
-function createLandscape() {
-    // Generate tree array
-    var scales;// = vec3( 2.1, 2.1, 20.0);   // scale the trees
-    var location;
-    var factor;
 
-    // console.log(NST + NSH);
+/*
+ * Creates arrays of Tree and Hut objects in unique locations.
+ */
+function createLandscape() {
+    var scales; // scale variable used to alter the objects
+    var location; // vertices information for the location of the object
+    var factor; // another scaling value used to alter the tree objects
+
+    // number of locations needed to be produced
     var nLocations = NST + NSH;
-    // console.log(NST);
-    // console.log(NSH);
-    // console.log(NST+NSH);
-    // console.log(nLocations);
+    // create a unique array of vertices positions to be used in object creation
     var unique = uniqueLocations( nLocations, AREA);
 
+    // show stae information in console
     showState();
     console.log("locations = " + unique.length);
 
+    // create the randomly located and sized tree object array
     for (var i = NSH; i < NST; i++) {
         location = unique[i + 0];
         factor = ((Math.random() * 1.0) - 3.0);
         scales = vec3( factor , factor, ((Math.random() * 20.0) + 10.0));   // scale the trees ( 2.1 , 2.1, ((Math.random() * 20.0) + 10.0))
         trees[i] = new Tree(location, scales);
     }
-
+    // create the randomly located hut object array
     for (var i = 0; i < NSH; i++) {
         location = unique[i];
         // factor = ((Math.random() * 1.0) - 3.0);
@@ -368,12 +404,16 @@ function uniqueLocations(numberOfLocations, area){
 
 
 
+/*
+ * Set the number of trees to display in the scene. Changes the state variable NST
+ */
 function setNumberOfTrees(numberOfTrees){
-    NST = parseInt(numberOfTrees);
-    // if (NST > 50 && NSH > 3){
-    //     NSH = 2;
-    //     document.getElementById("hut-slider").value = NSH;
-    // }
+    NST = parseInt(numberOfTrees); // used the parseInt function to convert string to int
+                                    // this actually was a bug that tok a long time to figure out 
+                                    // what was wrong. The resulting problem didn't show up until
+                                    // next time the variable was accessed. The result concatenated two strings
+                                    // rather than add to integers major brain pain finding it!!!
+
     huts = [];  // re initialize the array
     trees = []; // re initialize the array
     createLandscape(); // create a new landscape
@@ -381,13 +421,15 @@ function setNumberOfTrees(numberOfTrees){
 
 
 
-function setNumberOfHuts(numberOfHuts){
-    console.log("setNumberOfHuts("+ numberOfHuts + ")");
-    NSH = parseInt(numberOfHuts);
-    // if (NSH > 5 && NST > 50){
-    //     NST = 50;
-    //     // document.getElementById("tree-slider").value = NST;
-    // }
+/*
+ * Set the number of huts to display in the scene. Changes the state variable NSH
+ */
+function setNumberOfHuts(numberOfHuts) {
+    NSH = parseInt(numberOfHuts); // used the parseInt function to convert string to int
+                                    // this actually was a bug that tok a long time to figure out 
+                                    // what was wrong. The resulting problem didn't show up until
+                                    // next time the variable was accessed. The result concatenated two strings
+                                    // rather than add to integers major brain pain finding it!!!!
 
     huts = [];  // re initialize the array
     trees = []; // re initialize the array
@@ -396,11 +438,21 @@ function setNumberOfHuts(numberOfHuts){
 
 
 
-function showLocation(type, location){
+/*
+ * outputs location information to console
+ * (this helped me find my bug which caused the implementation 
+ * of method in the two setter features parseInt() )
+ */
+function showLocation(type, location) {
     console.log(type + ":" +location);
 }
 
-function showState(){
+
+
+/*
+ * Display state information in console
+ */
+function showState() {
     console.log("Huts = " + NSH);
     console.log("Trees = " + NST);
     

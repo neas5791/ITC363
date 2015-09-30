@@ -1,3 +1,7 @@
+// ITC363 Assignment 3
+// Task 1: A 3D Function-Viewing Program
+// Sean Matkovich
+// ID: 11187033
 
 var gl;             // the gl context object
 
