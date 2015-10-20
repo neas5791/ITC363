@@ -2,9 +2,20 @@
 // The Tree class
 // The constructor function for a block
 // Arguments: a vec3 location, a floating-point angle (degrees) and a vec3 scales
-function Tree(location, scales) {
+// var shade;
+
+Tree.COLOUR = [
+                vec4( 0.0, 0.30, 0.0, 1.0), 
+                vec4( 0.0, 0.40, 0.0, 1.0), 
+                vec4( 0.0, 0.50, 0.0, 1.0), 
+                vec4( 0.0, 0.60, 0.0, 1.0), 
+                vec4( 0.0, 0.70, 0.0, 1.0)  
+            ]; // 003300 // 006600 // 009900 // 00CC00 // 00FF00
+
+function Tree(location, scales, shade) {
     var rs = scalem(scales);
     this.trs = mult(translate(location), rs);
+    this.shade = shade;
 }
 
 // A Tree's render function
@@ -13,7 +24,10 @@ function Tree(location, scales) {
 //   worldview - current worldview transformation
 Tree.prototype.render = function(offset, worldview, colLoc) {
     gl.uniformMatrix4fv(mvLoc, false, flatten(mult(worldview, this.trs)));
-    gl.uniform4fv(colLoc, flatten(Tree.GREEN));
+
+    gl.uniform4fv(colLoc, flatten(this.shade));  
+
+    // gl.uniform4fv(colLoc, flatten(GREEN));
     gl.drawArrays(gl.TRIANGLE_FAN, offset, Tree.faces + 2);
     gl.uniform4fv(colLoc, flatten(Tree.BROWN));
     gl.drawArrays(gl.TRIANGLES, offset + Tree.faces + 2, Tree.faces * 2 * 3);

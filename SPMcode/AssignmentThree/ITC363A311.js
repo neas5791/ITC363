@@ -41,7 +41,7 @@ const grey =  vec4(0.539, 0.539, 0.539, 1.0);
 /* ******************************************** */
 
 const at = vec3(0.0, 0.0, 0.0); // the center of the object
-const up = vec3(0.0, 1.0, 0.0); // the reference up direction
+const up = vec3(0.0, 0.0, 1.0); // the reference up direction
 
 var left = -2.0;    // dimensions of the viewing volume
 var right = 2.0;    // dimensions of the viewing volume
@@ -161,7 +161,7 @@ function buildDataArray()
             var y = (j - ( n / 2 ) ) * unit;
 
             // set the value of z based on the function f(x,y) = x^2 + y^2
-            var z = x*x+y*y;
+            var z = x*x-y*y;
             
             // push the z value to the array
             data[i][j] = z;

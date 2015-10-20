@@ -237,6 +237,15 @@ function render() {
 
 }
 
+var COLOUR = [
+                vec4( 0.0, 0.2, 0.0, 1.0), 
+                vec4( 0.0, 0.4, 0.0, 1.0), 
+                vec4( 0.0, 0.6, 0.0, 1.0), 
+                vec4( 0.0, 0.8, 0.0, 1.0), 
+                vec4( 0.0, 1.0, 0.0, 1.0)  
+            ]; // 003300 // 006600 // 009900 // 00CC00 // 00FF00
+
+
 
 /*
  * Creates arrays of Tree and Hut objects in unique locations.
@@ -260,7 +269,7 @@ function createLandscape() {
         location = unique[i + 0];
         factor = ((Math.random() * 1.0) - 3.0);
         scales = vec3( factor , factor, ((Math.random() * 20.0) + 10.0));   // scale the trees ( 2.1 , 2.1, ((Math.random() * 20.0) + 10.0))
-        trees[i] = new Tree(location, scales);
+        trees[i] = new Tree(location, scales, Tree.COLOUR[ Math.floor ( Math.random() * 3 ) ] );
     }
     // create the randomly located hut object array
     for (var i = 0; i < NSH; i++) {
