@@ -5,6 +5,10 @@
 
 var gl;             // the gl context object
 
+var faces = 20
+;
+
+
 var n;              // the number of divisions map out
 var nRows;          // used for array to store x co ordinates
 var nColumns;       // used for array to stor y co ordinate
@@ -92,8 +96,11 @@ window.onload = function init()
 
 
     // get the number vertices to display from the user interface html slider
+
     setVerticesCount(document.getElementById("vertex-slider").value);
 
+    var cone = makeCone(faces);
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(cone), gl.STATIC_DRAW); // push the new pointArray to the buffer
 // buttons for moving viewer and changing size 
 
     document.getElementById("Button1").onclick = function()  { near   *= 1.1 ; far    *= 1.1 ; render() ; };
@@ -118,6 +125,33 @@ window.onload = function init()
 }
 
 
+// outputs vertices to produce triangle fan in cone shape
+// 
+function makeCone(nfaces)
+{
+    // var faces = nfaces;
+    var omega = (360.0 / faces) * (Math.PI / 180.0);
+    var vertices = [];
+
+
+    // The 8 raw vertices of the canopy (cone shape)
+    vertices.push( vec4( 0.0, 0.0, 0.5 , 1) );
+    for (var i = 0; i < faces; i++){
+        vertices[i + 1] = vec4( Math.cos( i * omega) / 2.0, Math.sin( i * omega) / 2.0, 0.1, 1 ); // scale the rawVertices
+    }
+    vertices.push(vertices[1]);
+
+    for (var j = 0 ; j < vertices.length; j++) {
+        console.log(vertices[j]);
+    }
+
+    return vertices;
+}
+
+
+
+
+
 /*
  * Set the state variables of the mesh based on the number of vertices
  *
@@ -133,10 +167,10 @@ function setVerticesCount(value)
     unit = 2.0 / n; // as we map the plot from -1 < x < 1 && -1 < y < 1 our array starts at the exteme
                     // of x = -1 and y = -1  effective unit constant is double the inverse of division
 
-    buildDataArray();   // calculate and produce vertices data array
-    buildPointArray();  // arrange data array values into ordered vetices list
+    // buildDataArray();   // calculate and produce vertices data array
+    // buildPointArray();  // arrange data array values into ordered vetices list
 
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW); // push the new pointArray to the buffer
+    // gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW); // push the new pointArray to the buffer
 }
 
 
@@ -257,21 +291,27 @@ function render()
 
     gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
     gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
-    
-    // draw each quad as two filled yellow triangles
-    // and then as two black line loops
-    for( var i = 0; i < pointsArray.length - 6; i += 4 ) { 
+
         gl.uniform4fv(fColor, flatten(yellow));
-        gl.drawArrays( gl.TRIANGLE_FAN, i, 4 );
+        gl.drawArrays( gl.TRIANGLE_FAN, 0, faces + 2 );
+    
+    // for (var i = 0; i < faces; i ) {
+        // gl.drawArrays( gl.LINE_LOOP, 0, 3 );
+    // }
+    // // draw each quad as two filled yellow triangles
+    // // and then as two black line loops
+    // for( var i = 0; i < pointsArray.length - 6; i += 4 ) { 
+    //     gl.uniform4fv(fColor, flatten(yellow));
+    //     gl.drawArrays( gl.TRIANGLE_FAN, i, 4 );
 
-        // change the LINE_LOOP colour based on the number of vertices displayed in the mesh
-        if (n > 50 )
-            gl.uniform4fv(fColor, flatten(grey));
-        else
-            gl.uniform4fv(fColor, flatten(black));
+    //     // change the LINE_LOOP colour based on the number of vertices displayed in the mesh
+    //     if (n > 50 )
+    //         gl.uniform4fv(fColor, flatten(grey));
+    //     else
+    //         gl.uniform4fv(fColor, flatten(black));
 
-        gl.drawArrays( gl.LINE_LOOP, i, 4 );
-    }
+    //     gl.drawArrays( gl.LINE_LOOP, i, 4 );
+    // }
 
     // Draw the axis markers 
     // x axis red
