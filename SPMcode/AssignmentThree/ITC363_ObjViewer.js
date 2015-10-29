@@ -10,8 +10,6 @@ var faces = 20;
 
 var pointsArray = [];   // the array that will store the vertices information to be sent to buffer
 
-var fColor;     // vertex shader link variable
-
 var near   = -10 ; // initial position for near altered by increasing and decreasing the z buttons
 var far    =  10 ;   // initial position for far  altered by increasing and decreasing the z buttons
 var radius =  6.0 ;   // initial position of camera
@@ -24,8 +22,8 @@ var dr     =   5.0 * Math.PI / 180.0 ;   // the amount to alter theta and phi
 const black = vec4(0.0, 0.0, 0.0, 1.0);
 const lgreen = vec4(0.37, 0.68, 0.53);
 const red = vec4(1.0, 0.0, 0.0, 1.0);
-const blue = vec4(0.0, 1.0, 0.0, 1.0);
-const green = vec4(0.0, 0.0, 1.0, 1.0);
+const blue = vec4(0.0, 0.0, 1.0, 1.0);
+const green = vec4(0.0, 1.0, 0.0, 1.0);
 const yellow = vec4(1.0, 1.0, 0.0, 1.0);
 const grey =  vec4(0.539, 0.539, 0.539, 1.0);
 /* ******************************************** */
@@ -51,7 +49,6 @@ window.onload = function init()
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor(0.6, 0.8, 1.0, 1.0);      // Light blue background    
 
-    
     // enable depth testing and polygon offset
     // so lines will be in front of filled triangles
     gl.enable(gl.DEPTH_TEST);
@@ -59,9 +56,7 @@ window.onload = function init()
     gl.enable(gl.POLYGON_OFFSET_FILL);
     gl.polygonOffset(1.0, 2.0);
 
-    //
     //  Load shaders and initialize attribute buffers
-    //
     var program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
     
@@ -83,8 +78,9 @@ window.onload = function init()
     // get the number vertices to display from the user interface html slider
     // setVerticesCount(document.getElementById("vertex-slider").value);
 
-    var cone = makeCone(faces);
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(cone), gl.STATIC_DRAW); // push the new pointArray to the buffer
+    var tree = makeTree(faces);
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(tree), gl.STATIC_DRAW); // push the new pointArray to the buffer
+
 // buttons for moving viewer and changing size 
 
     document.getElementById("Button1").onclick = function()  { near   *= 1.1 ; far    *= 1.1 ; render() ; };
@@ -103,9 +99,19 @@ window.onload = function init()
 
     // document.getElementById("vertex-slider").onchange = function(event) { setVerticesCount(event.target.value); render() ; };
 
-       
     render();
- 
+}
+
+
+/*
+ * Outputs state variable information to console
+*/
+function state()
+{
+    console.log("n: " + n);
+    console.log("nRows: " + nRows);
+    console.log("nColumns: " + nColumns);
+    console.log("unit: " + unit);
 }
 
 
@@ -128,43 +134,46 @@ function render()
     gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
     gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
 
-        gl.uniform4fv(fColor, flatten(yellow));
-        gl.drawArrays( gl.TRIANGLE_FAN, 0, faces + 2 );
+    gl.uniform4fv(fColor, flatten(green));
+    gl.drawArrays( gl.TRIANGLE_FAN, 0, faces + 2 );
+    gl.uniform4fv(fColor, flatten(black));
+    gl.drawArrays( gl.TRIANGLE_STRIP, faces + 4, (faces*2) + 2 );
 }
 
 
+
 // outputs vertices to produce triangle fan in cone shape
-// 
-function makeCone(nfaces)
+function makeTree(nfaces)
 {
+    var vCone = nfaces + 2;
     var omega = (360.0 / faces) * (Math.PI / 180.0);
     var vertices = [];
 
     // The 8 raw vertices of the canopy (cone shape)
     vertices.push( vec4( 0.0, 0.0, 0.5 , 1) );
-
     for (var i = 0; i < faces; i++){
         vertices[i + 1] = vec4( Math.cos( i * omega) / 2.0, Math.sin( i * omega) / 2.0, 0.1, 1 ); // scale the rawVertices
     }
 
+    // push the first point of the fan to complete the cone
     vertices.push(vertices[1]);
+
+    var vCylinder = nfaces * 2;
+
+    for (var j = 0 ; j < faces*2; j++) {
+        if (j == 0 ) {
+            vertices.push( vec4( Math.cos( j * omega) / 2.0, Math.sin( j * omega) / 2.0, 0.1, 1));
+            vertices.push( vec4( Math.cos( j * omega) / 2.0, Math.sin( j * omega) / 2.0, 0.0, 1));
+        }
+        
+        vertices.push( vec4( Math.cos( (j + 1) * omega) / 6.0, Math.sin( (j + 1) * omega) / 6.0, 0.1, 1));
+        vertices.push( vec4( Math.cos( (j + 1) * omega) / 6.0, Math.sin( (j + 1) * omega) / 6.0, 0.0, 1));
+    }
+
 
     for (var j = 0 ; j < vertices.length; j++) {
         console.log(vertices[j]);
     }
 
     return vertices;
-}
-
-
-
-/*
- * Outputs state variable information to console
-*/
-function state()
-{
-    console.log("n: " + n);
-    console.log("nRows: " + nRows);
-    console.log("nColumns: " + nColumns);
-    console.log("unit: " + unit);
 }
